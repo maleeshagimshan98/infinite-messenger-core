@@ -19,7 +19,7 @@ Install the package with npm
 ## Getting Started
 
 #### Important
- I reccomend using a seperate mongoDB database or firebase project for this messaging feature.
+I reccomend using a separate mongoDB database or firebase project for this messaging feature.
 
 To start using this library, Import the package, create a new instance of `MessengerCore` and initialize user with `initUser()`. All required methods are described below.
 
@@ -28,7 +28,7 @@ To start using this library, Import the package, create a new instance of `Messe
 ````
 import MessengerCore from 'infinite-messenger-core';
 
-let firebaseConfig = { /*firebase configuration object*/ };
+let firebaseConfig = { /*path/to/serviceAccountKey.json*/ };
 
 //... your application
 let messenger = new MessengerCore({dbDriver : 'firebase',dbConfig : firebaseConfig});
@@ -135,12 +135,12 @@ let conversations = messenger.user.conversations(); //... get received conversat
 
 ### Create new conversation
 
-call `newThread()` method as follows. This saves the conversation data for all participants.
+call `newThread()` method as follows. This saves the conversation data for all participants. Pass participant user's data as below object. *(Don't send current user as a participant, current user is automatically set as a participant)*
 
 ````
     messenger.newThread(
         [
-            //... user object
+            //... participant object
             {
                 id : "00002",
                 name : "test user 2",

@@ -11,12 +11,13 @@
      * 
      * @param {object} 
      */
-    constructor ({id,senderId,content,time})
+    constructor ({id,senderId,content,time,timestamp})
     {
         this.id = id ?? new Date().getTime().toString();
         this.senderId = senderId;
         this.content = content ?? '';
         this.time = time ?? new Date().toUTCString();
+        this.timestamp = timestamp ?? new Date().getTime();
     }
 
     /**
@@ -53,8 +54,18 @@
             id : this.id,
             senderId : this.senderId,
             time : this.time,
+            timestamp : this.timestamp,
             content : this.content,
         };
+    }
+
+    /**
+     * set tmiestamp of the message
+     * 
+     * @returns {void} void
+     */
+    setTimestamp () {
+        this.timestamp = new Date().getTime();
     }
 
     /**
@@ -63,9 +74,10 @@
      * @param {Object} data message data
      * @returns {void} void 
      */
-     update ({time,content}) {
-        this.time = time ?? this.participants;
-        this.content = content ?? this.lastUpdated;
+     update ({time,timestamp,content}) {
+        this.time = time ?? this.time;
+        this.timestamp = timestamp ?? this.setTimestamp();
+        this.content = content ?? this.content;
     }
 
     /**
@@ -86,4 +98,4 @@
 
 }
 
-export default Message;
+module.exports = Message;

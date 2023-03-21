@@ -2,7 +2,7 @@
  * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
- import { MongoClient } from "mongodb";
+ const {MongoClient} = require("mongodb");
 
 
  /**
@@ -187,4 +187,4 @@
 
  };
 
- export default Mongodb;
+ module.exports = Mongodb;

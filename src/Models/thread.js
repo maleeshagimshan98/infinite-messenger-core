@@ -2,11 +2,11 @@
  * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
- import Message from "./message";
+ const Message = require("./message");
 
  /**
   * This class represents a thread - conversation of a user.
-  * Handles message retrieval, sending
+  * Handles the message retrieval, sending
   */
  class Thread {
     /**
@@ -15,14 +15,16 @@
      * @param {object} data
      * @param {} datastore - datastore instance (firebase/mongodb)
      */
-    constructor ({id,participants,started,lastUpdated,messages},datastore)
+    constructor ({id,participants,started,lastUpdated,timestamp,messages},datastore)
     {
         this.__datastore = datastore;
         this.__isListening = false;
+        this.__lastMessage = null;
         this.id = id;
         this.participants = participants ?? [];
         this.started = started ?? new Date().toUTCString();
         this.lastUpdated = lastUpdated ?? new Date().toUTCString();
+        this.timestamp = timestamp ?? this.setTimestamp();
         this.messages = messages ?? {};
     }
 
@@ -44,8 +46,12 @@
         return this.started;
     }
 
-    getLstUpdated() {
+    getLastUpdated() {
         return this.lastUpdated;
+    }
+
+    getLastMessage () {
+        return this.__lastMessage;
     }
 
     getMessages() {
@@ -65,6 +71,7 @@
             participants : this.participants,
             started : this.started,
             lastUpdated : this.lastUpdated,
+            timestamp : this.timestamp,
             //messages : this.messages,
         };
     }
@@ -75,16 +82,9 @@
      * ============================
      */
 
-    /**
-     * update conversation data
-     * 
-     * @param {Object} data conversation data
-     * @returns {void} void 
-     */
-    update ({participants,lastUpdated}) {
-        this.participants = participants ?? this.participants;
-        this.lastUpdated = lastUpdated ?? this.lastUpdated;
-    }
+    __setLastMessage (lastMessageId) {
+        this.__lastMessage = lastMessageId;
+    }    
 
     /**
      * set participants in the conversation
@@ -106,17 +106,37 @@
         this.lastUpdated = lastUpdated;
     }
 
+    setTimestamp () {
+        this.timestamp = new Date().getTime();
+    }
+
+    /**
+     * update conversation data - update conversation itself
+     * **DOES NOT UPDATE DATABASE**
+     * 
+     * @param {Object} data conversation data
+     * @returns {void} void 
+     */
+     update ({participants,lastUpdated}) {
+        this.participants = participants ?? this.participants;
+        this.lastUpdated = lastUpdated ?? this.lastUpdated;
+    }
+    
+    /** ======================================= */    
+
      /**
      * add new messages to  the conversation
      * if the message is already in ````this.messages````, updates the data.
+     * updates the last message id in ````this.__lastMessage````
      * 
      * DOES NOT save messages in the database.
      * 
      * @param {Object} message
-     * @returns {void} void
+     * @returns {Message} message
      */
-    setMessages (message) {
-        this.setLastUpdated(new Date().toUTCString()); //... CHECK - update lastUpdated in the firestore too
+    __setMessages (message) {
+        this.setTimestamp();
+        this.setLastUpdated(new Date().toUTCString()); //... CHECK - update lastUpdated in the firestore too        
         if (message.id && this.messages[message.id]) {
             this.messages[message.id].update(message); 
             return this.messages[message.id];           
@@ -124,28 +144,9 @@
         else {
             let _message = new Message(message);
             this.messages[_message.id] = _message;
+            this.__setLastMessage(_message.id);
             return _message;
         }
-        
-    }
-
-    /**
-     * send messages
-     * SAVES messages in the database,updates the conversation's last updated time
-     * 
-     * @param {Object} message
-     * @returns {void} void
-     */
-    async sendMessage (message) {
-        let messageObj = this.setMessages(message);
-        await this.__datastore.setDocument(this.id,messageObj.getId(),messageObj.toObj());
-    }
-
-    /**
-     * delete message
-     */
-    async deleteMessage () {
-
     }
 
     /**
@@ -156,11 +157,11 @@
      * @param {String|Number} limit messages limit
      * @returns {void} void
      */
-    listen (callback = null,limit = 25) {
+     listen (callback = null) {
         this.__isListening = true;
-        this.__datastore.listenToCollection(this.id,limit, messages => {
+        this.__datastore.listenToCollection(this.id,messages => {
             messages.forEach( message => {
-                this.setMessages(message.data());
+                this.__setMessages(message.data());
             });
         });
 
@@ -170,17 +171,34 @@
     }
 
     /**
+     * send messages
+     * SAVES messages in the database,updates the conversation's last updated time
+     * 
+     * @param {Object} message
+     * @returns {void} void
+     */
+    async sendMessage (message) {
+        let messageObj = this.__setMessages(message);
+        await this.__datastore.setMessage(this.id,messageObj);
+    }    
+
+    /**
+     * delete message
+     */
+    async deleteMessage (messageId) {
+        this.messages[messageId] = null;
+        await this.__datastore.deleteMessage(messageId);
+    }
+
+    /**
      * stop listening to new messages in this conversation
      * 
      * @returns {void} void
      */
     detachListener () {
         this.__isListening = false;
-        this.__datastore.detach('collections',this.id);
+        this.__datastore.detach(this.id);
     }
-    
-
-
 }
 
-export default Thread;
+module.exports = Thread;

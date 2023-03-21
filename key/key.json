@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "infinite-messenger-core",
+  "private_key_id": "fe37bcf714368a59028cb7ea0864c75e3eacfb83",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCtGITG9y+L9TiE\nyLCiB8o16/BIxQgKAJwNdbXyMq0G6GssiUYPSnRomM2ej+Ovqbk3/+5hD9bB8WXw\nozBzIkGXl9KE1J3YXNCh4T5d3C2QrrwNu4c8EOWEfWagdu9pSZLwzupMoRYtPFSH\nSjmjfis1jqAO8osmph9JoBtdg6+ydBS31mQ2Y8zxXIRgOz1PrMoZEHUjNClkkocs\no9Io9RNIzkO0e+L0IM+nHLvQeZaCbN0PaF7RzyNy7+Qb2+8p24rVUTncbuu6R84x\nzKE9fgyAP0AUtmpT3VR5vx43VPCW0rdRBU9vHPWYc8WkPRJ7G36i08zXAE1yQYip\n+EGlYFKdAgMBAAECggEAB6bKz8TDfEtVuUDp1e/EN4f7ciwLg+2s+EdYyKEG1wRV\nIH3c8/YVmT4P8M9pgC1fe6M7lVzO4HncSLvd+2jrP1k9vBNt+s93hYBgcmO2O+wN\ncgn1G2mfy7CDZdp8EMpozW5IGyUPxuYg0m4siBaesFpipuZ/0jCLt4R1UTft/1Rh\npYQGtbUIgdwDdeWlwsSzAtF9bprZGx/io/r5GHaBMqMj2dE/MaatQvaHGXuq1ttS\nQNx2B6Igy+PQA2ykCX8IZS1UoMSzzheGfb8lQhspJNddxl6DpuTa8trRASBXWgxU\njN5d/B4FJ3rEdFGQjcbt5LXuPAgkStApF/r3TsBK3QKBgQDfPwawyhgU3yrNluwt\n6xl1UdfiOriIWYt044h8z9CeU3jCXKfy63uYStD2+ionACDMYYR29JpzzqQaRl9a\n/0nLiJlM74kqqpYRrK8P4ukvzCyc0QacDkaDsyO1YIxPerNjyFlKs2yuSvnUnWXK\niCM+zprkIHV3dvXLUBe0v25KKwKBgQDGfeCPIK0UsICZA7XF7ERZrlhzy2KljV7A\npWV3ggDf9WR8C3hMvXTMd8v7+jVAGQmabX7pW6U6YHbrkb1Pq2cTUYO3uDOOF3EA\nAi/yn7xttsRg1ei2YGhvxi+dKFDwE2bwdOKN1hwmpqVV7z7FOURzd6ECskR3hV+4\nCV6JY3ZaVwKBgCRPGOR6Cg6i+VA0wrb5LMvTAtytlkO+5JqfQxyhpBmME/DwpvQw\nboqnaHMy3tY3BB6ZobTDNbeuHSyU0392U+dBkUVdFB8XXY8EWfiofCqk94CN0phh\nDgDvitg+GrP2jeSlujgXFI8IbLey3dJh7/GQIssFqHVEqNdncGOaWvK/AoGBAJnC\nyUIWvf1Y/UWLajR4YjpWpI6O70vvx4bUmVWKj8LuBXlSKU7JNMFvy8TWfom424eV\nasq7A7PFJlo1+8DLtn1wl+ip+MYJwq+PAjWhKAaVnmqlSjB9Xmm3zQqhQJG5dfSv\nlxDo28XVMh7vxmBhjHUmJsQ/9GniF9Qo7eLf+b7hAoGBANhImOhVtAn3jtJHljIY\nBDgNlm9bRG+5ILoybQdbOuRfGEQiDa0ItR0AuChRYCOrZ2Obc024Er4dIDJlkaiO\ncul/41nYMTfBnRU8xe/C92mpHTOF2S24IKcFv+B4hpOBhPMJCoN0kx7qvbz2niEK\n4o8iKzQj1BfseHXUUQxSKWmU\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-iuw38@infinite-messenger-core.iam.gserviceaccount.com",
+  "client_id": "104757027041329249396",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-iuw38%40infinite-messenger-core.iam.gserviceaccount.com"
+}
