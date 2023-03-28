@@ -1,8 +1,8 @@
 {
-  "name": "infinite-messenger-core",
-  "version": "1.0.0",
+  "name": "@maleeshagimshan98/infinite-messenger-core",
+  "version": "1.0.1",
   "description": "realtime messenging library built with Google Firebase/MongoDB, for Node.js servers",
-  "main": "MessengerCore.js",
+  "main": "src/MessengerCore.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

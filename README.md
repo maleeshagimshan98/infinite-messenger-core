@@ -26,7 +26,7 @@ To start using this library, Import the package, create a new instance of `Messe
 **Example**
 
 ````
-import MessengerCore from 'infinite-messenger-core';
+const MessengerCore = require('infinite-messenger-core');
 
 let firebaseConfig = { /*path/to/serviceAccountKey.json*/ };
 
