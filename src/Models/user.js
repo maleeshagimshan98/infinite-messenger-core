@@ -8,6 +8,70 @@ const Thread =  require("./thread");
  * This class represents a user in the messaging system
  */
 class User {
+
+    /**
+     * user id
+     * 
+     * @type {string}
+     */
+    _id
+
+    /**
+     * user name
+     * 
+     * @type {string}
+     */
+    _name
+
+    /**
+     * Indicates whether user is active or not
+     * 
+     * @type {boolean}
+     */
+    _isActive
+
+    /**
+     * User's last seen time
+     * 
+     * @type {string}
+     */
+    _lastSeen
+
+    /**
+     * Link to user's profile image
+     * 
+     * @type {string}
+     */
+    _profileImg
+
+    /**
+     * User's permissions
+     * 
+     * @type 
+     */
+    _permissions
+
+    /**
+     * Usre's unique id for his conversations
+     * 
+     * @type {string}
+     */
+    _conversationsId
+
+    /**
+     * Last conveersation id of the user
+     * 
+     * @type {string}
+     */
+    __lastConversationId
+
+    /**
+     * User's conversations
+     * 
+     * @type {array<Thread>}
+     */
+    __conversations
+
     /**
      * constructor
      * 
@@ -17,15 +81,15 @@ class User {
     constructor ({id,name,profileImg,lastSeen,permissions,conversationsId},datastore)
     {
         this.__datastore = datastore;
-        this.id = id;
-        this.name = name;
-        this.isActive = true;
-        this.lastSeen = lastSeen??'';
-        this.profileImg = profileImg??''; 
-        this.permissions = permissions??[];       
-        this.conversationsId = conversationsId??'conv_'+this.id;
+        this._id = id;
+        this._name = name;
+        this._isActive = true;
+        this._lastSeen = lastSeen??'';
+        this._profileImg = profileImg??''; 
+        this._permissions = permissions??[];       
+        this._conversationsId = conversationsId??'conv_'+this._id;
         /** conversation id of last received conversation */
-        this.__lastConversation = null;
+        this.__lastConversationId = null;
         this.__conversations = {};
 
         /** async calls */
@@ -39,27 +103,27 @@ class User {
      */
 
     getId() {
-        return this.id;
+        return this._id;
     }
 
     getName() {
-        return this.name;
+        return this._name;
     }
 
     getProfileImg() {
-        return this.profileImg;
+        return this._profileImg;
     }
 
     getIsActive() {
-        return this.isActive;
+        return this._isActive;
     }
 
     getLastSeen() {
-        return this.lastSeen;
+        return this._lastSeen;
     }
 
     getConversationsId () {
-        return this.conversationsId;
+        return this._conversationsId;
     }
 
     conversations () {
@@ -67,7 +131,7 @@ class User {
     }
 
     getPermissions () {
-        return this.permissions;
+        return this._permissions;
     }    
 
     /** ============================== */
@@ -79,13 +143,13 @@ class User {
      */
     toObj() {
         return {
-            id : this.id,
-            name : this.name,
-            profileImg : this.profileImg,
-            lastSeen : this.lastSeen,
-            isActive : this.isActive,
-            permissions : this.permissions,
-            conversationsId : this.conversationsId,
+            id : this._id,
+            name : this._name,
+            profileImg : this._profileImg,
+            lastSeen : this._lastSeen,
+            isActive : this._isActive,
+            permissions : this._permissions,
+            conversationsId : this._conversationsId,
         };
     }
 
@@ -102,7 +166,7 @@ class User {
      * @returns {void} void
      */
     setId (id) {
-        this.id = id;
+        this._id = id;
     }
 
     /**
@@ -112,7 +176,7 @@ class User {
      * @returns {void} void
      */
     setProfileImg(url) {
-        this.profileImg = url;
+        this._profileImg = url;
     }
     
     /**
@@ -124,7 +188,7 @@ class User {
      */
     async setIsActive (status) {
         //... TODO - check - update the database too
-        this.isActive = status;
+        this._isActive = status;
     }
 
     /**
@@ -134,7 +198,7 @@ class User {
      * @returns {void} void
      */
     async setLastSeen(time) {
-        this.lastSeen = time;
+        this._lastSeen = time;
         // =========================
         //... update datastore too
         // ========================
@@ -147,7 +211,7 @@ class User {
      * @returns {void} void
      */
      setPermissions (permission) {
-        this.permissions.push(permission);
+        this._permissions.push(permission);
     }    
 
     /**
@@ -157,7 +221,7 @@ class User {
      * @returns {void}
      */
     __setLastConversation (conversationId) {
-        this.__lastConversation = conversationId;
+        this.__lastConversationId = conversationId;
         // =========================
         //... update datastore too
         // =========================
@@ -187,7 +251,7 @@ class User {
      * @returns {Promise<object>} user's conversations
      */
     async getConversations () {
-        let conversations = await this.__datastore.conversations.getConversations(this.conversationsId,this.__lastConversation);
+        let conversations = await this.__datastore.conversations.getConversations(this._conversationsId,this.__lastConversationId);
         
         //... if no conversation is found, conversations is false.
         if (conversations) {
@@ -206,7 +270,7 @@ class User {
      */
     async listenToConversations (callback) {
         //... default threads limit 25 used
-        this.__datastore.conversations.listenToConversations(this.conversationsId,threads => {            
+        this.__datastore.conversations.listenToConversations(this._conversationsId,threads => {            
             threads.forEach( thread => {
                 this.__setConversations(thread.data());
             });
@@ -220,7 +284,7 @@ class User {
      * @returns {void} void
      */
     detachListener () {
-        this.__datastore.conversations.detach(this.conversationsId);
+        this.__datastore.conversations.detach(this._conversationsId);
     }
     
     /**

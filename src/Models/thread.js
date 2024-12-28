@@ -46,22 +46,30 @@ class Thread {
   _participants
 
   /**
+   * Started date of the conversation
    * 
+   * @type {string}
    */
   _startedDate
 
   /**
+   * Last updated time of the conversation
    * 
+   * @type {string}
    */
   _lastUpdated
 
   /**
+   * Timestamp of the conversation
    * 
+   * @type {number}
    */
   _timestamp
 
   /**
+   * Messages of the conversation
    * 
+   * @type {array<Message>}
    */
   _messages
 

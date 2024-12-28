@@ -12,6 +12,12 @@ const User = require("./Models/user");
  * controls user's conversations, messages
  */
 class MessengerCore {
+
+  /**
+   * Datastore for the messenger
+   */
+  __datastore
+
   /**
    * constructor
    *

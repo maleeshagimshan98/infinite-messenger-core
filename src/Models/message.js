@@ -6,6 +6,42 @@
  * represents a message in a conversation
  */
 class Message {
+
+    /**
+     * message id
+     * 
+     * @type {string}
+     */
+    _id
+
+    /**
+     * sender id
+     * 
+     * @type {string}
+     */
+    _senderId
+
+    /**
+     * content of the message
+     * 
+     * @type {string}
+     */
+    _content
+
+    /**
+     * time of the message
+     * 
+     * @type {string}
+     */
+    _time
+
+    /**
+     * timestamp of the message
+     * 
+     * @type {number}
+     */
+    _timestamp
+
   /**
    * constructor
    *
