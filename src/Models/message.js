@@ -5,97 +5,95 @@
 /**
  * represents a message in a conversation
  */
- class Message {
-    /**
-     * constructor
-     * 
-     * @param {object} 
-     */
-    constructor ({id,senderId,content,time,timestamp})
-    {
-        this.id = id ?? new Date().getTime().toString();
-        this.senderId = senderId;
-        this.content = content ?? '';
-        this.time = time ?? new Date().toUTCString();
-        this.timestamp = timestamp ?? new Date().getTime();
+class Message {
+  /**
+   * constructor
+   *
+   * @param {object}
+   */
+  constructor({ id, senderId, content, time, timestamp }) {
+    this._id = id ?? new Date().getTime().toString()
+    this._senderId = senderId
+    this._content = content ?? ""
+    this._time = time ?? new Date().toUTCString()
+    this._timestamp = timestamp ?? new Date().getTime()
+  }
+
+  /**
+   * =============================
+   * getters
+   * =============================
+   */
+
+  getId() {
+    return this._id
+  }
+
+  getSenderId() {
+    return this._senderId
+  }
+
+  getTime() {
+    return this._time
+  }
+
+  getContent() {
+    return this._content
+  }
+
+  /** ==================== */
+
+  /**
+   * convert this class to a plain object, in order to save in the database
+   *
+   * @returns {object} a plain object
+   */
+  toObj() {
+    return {
+      id: this._id,
+      senderId: this._senderId,
+      time: this._time,
+      timestamp: this._timestamp,
+      content: this._content,
     }
+  }
 
-    /**
-     * =============================
-     * getters
-     * =============================
-     */
+  /**
+   * set tmiestamp of the message
+   *
+   * @returns {void} void
+   */
+  setTimestamp() {
+    this._timestamp = new Date().getTime()
+  }
 
-    getId() {
-        return this.id;
-    }
+  /**
+   * update message data
+   *
+   * @param {object} data message data
+   * @returns {void} void
+   */
+  update({ time, timestamp, content }) {
+    this._time = time ?? this._time
+    this._timestamp = timestamp ?? this.setTimestamp()
+    this._content = content ?? this._content
+  }
 
-    getSenderId() {
-        return this.senderId;
-    }
+  /**
+   * ============================
+   * setters
+   * ============================
+   */
 
-    getTime() {
-        return this.time;
-    }
-
-    getContent() {
-        return this.content;
-    }
-    
-    /** ==================== */
-    
-    /**
-     * convert this class to a plain object, in order to save in the database
-     * 
-     * @returns {Object} a plain object
-     */
-    toObj() {
-        return {
-            id : this.id,
-            senderId : this.senderId,
-            time : this.time,
-            timestamp : this.timestamp,
-            content : this.content,
-        };
-    }
-
-    /**
-     * set tmiestamp of the message
-     * 
-     * @returns {void} void
-     */
-    setTimestamp () {
-        this.timestamp = new Date().getTime();
-    }
-
-    /**
-     * update message data
-     * 
-     * @param {Object} data message data
-     * @returns {void} void 
-     */
-     update ({time,timestamp,content}) {
-        this.time = time ?? this.time;
-        this.timestamp = timestamp ?? this.setTimestamp();
-        this.content = content ?? this.content;
-    }
-
-    /**
-     * ============================
-     * setters
-     * ============================
-     */
-
-    /**
-     * set message content
-     * 
-     * @param {String} message
-     */
-    setContent(message) {
-        this.content = message;
-    }
-    
-
+  /**
+   * set message content
+   *
+   * @param {string} message
+   * @returns {void} void
+   */
+  setContent(message) {
+    this._content = message
+  }
 }
 
-module.exports = Message;
+module.exports = Message

@@ -75,7 +75,7 @@ class User {
     /**
      * convert this class to a plain object, in order to save in the database
      * 
-     * @returns {Object} a plain object
+     * @returns {object} a plain object
      */
     toObj() {
         return {
@@ -98,7 +98,7 @@ class User {
     /**
      * set user's id
      * 
-     * @param {String} id user's id
+     * @param {string} id user's id
      * @returns {void} void
      */
     setId (id) {
@@ -120,9 +120,10 @@ class User {
      * also makes changes in remote database
      * 
      * @param {boolean} status - active status of user's
-     * @returns {void} void
+     * @returns {Promise<void>} void
      */
     async setIsActive (status) {
+        //... TODO - check - update the database too
         this.isActive = status;
     }
 
@@ -183,7 +184,7 @@ class User {
     /**
      * get user's conversations from database
      * 
-     * @returns {Object} user's conversations
+     * @returns {Promise<object>} user's conversations
      */
     async getConversations () {
         let conversations = await this.__datastore.conversations.getConversations(this.conversationsId,this.__lastConversation);
@@ -201,7 +202,7 @@ class User {
      * listen to user's new conversation updates
      * 
      * @param {Function} callback pass a callback to do something whenever user's conversations update. Updated conversations are provided as first argument
-     * @returns {void} void
+     * @returns {Promise<void>} Promise
      */
     async listenToConversations (callback) {
         //... default threads limit 25 used
@@ -227,7 +228,7 @@ class User {
      * saves the new conversation in the database
      * 
      * @param {Object} thread thread data
-     * @returns {Thread} created conversation object 
+     * @returns {Promise<Thread>} created conversation object 
      */
     async startConversation (thread) {
         let conversation = this.__setConversations(thread);   
@@ -237,6 +238,8 @@ class User {
 
     /**
      * update the user's data in datastore
+     * 
+     * @returns {Promise<void>} Promise
      */
      async updateUser () {        
         await this.__datastore.user.updateUser(this); //... check

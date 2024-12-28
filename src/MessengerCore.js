@@ -15,7 +15,7 @@ class MessengerCore {
   /**
    * constructor
    *
-   * @param {Object}
+   * @param {object}
    */
   constructor({ dbDriver, dbConfig }) {
     this.__datastore;
@@ -25,8 +25,8 @@ class MessengerCore {
   /**
    * initialise datastore
    *
-   * @param {String} dbDriver
-   * @param {String} dbConfig - Path to google application credentials
+   * @param {string} dbDriver
+   * @param {string} dbConfig - Path to google application credentials
    * @returns {void} void
    */
   __initDataStore(dbDriver, dbConfig) {
@@ -44,7 +44,7 @@ class MessengerCore {
   /**
    * get a user from the datastore
    *
-   * @param {String} userId user's id
+   * @param {string} userId user's id
    * @returns {Promise<User> | boolean}
    */
   async __getUser(userId) {
@@ -55,8 +55,8 @@ class MessengerCore {
   /**
    * initialise the user
    *
-   * @param {String} userId user's id
-   * @returns {User|Boolean} user object or false in failure
+   * @param {string} userId user's id
+   * @returns {Promise<User|Boolean>} user object or false in failure
    */
   async initUser(userId) {
     let user = await this.__getUser(userId);
@@ -82,7 +82,7 @@ class MessengerCore {
   /**
    * create and save new user in the datastore
    *
-   * @param {Object} user
+   * @param {object} user
    * @returns {Promise<User>}
    */
   async newUser(userObj) {
@@ -115,9 +115,9 @@ class MessengerCore {
   /**
    * create a new conversation
    *
-   * @param {Array} participants array of participating users
-   * @param {Object} thread thread data
-   * @returns {void} void
+   * @param {array} participants array of participating users
+   * @param {object} thread thread data
+   * @returns {Promise<void>} void
    */
   async newThread(participants, thread) {
     let users = [];
