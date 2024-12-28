@@ -49,6 +49,10 @@ class Message {
    */
   constructor({ id, senderId, content, time, timestamp }) {
     this._id = id ?? new Date().getTime().toString()
+
+    if (senderId == null) {
+        throw new Error(`Error:Message - Cannot set the senderId, It must be a valid id, but received ${typeof senderId}`)
+    }
     this._senderId = senderId
     this._content = content ?? ""
     this._time = time ?? new Date().toUTCString()
@@ -110,8 +114,8 @@ class Message {
    * @returns {void} void
    */
   update({ time, timestamp, content }) {
-    this._time = time ?? this._time
-    this._timestamp = timestamp ?? this.setTimestamp()
+    this._time = time ?? this._time //... Create the time within the method
+    this._timestamp = timestamp ?? this.setTimestamp() //... Check - just call setTImestamp()
     this._content = content ?? this._content
   }
 
@@ -126,8 +130,12 @@ class Message {
    *
    * @param {string} message
    * @returns {void} void
+   * @throws {TypeError}
    */
   setContent(message) {
+    if (typeof message !== 'string') {
+        throw new TypeError(`Error:Message - Cannot set the message content, it must be a string, but received ${typeof message}.`)
+    }
     this._content = message
   }
 }

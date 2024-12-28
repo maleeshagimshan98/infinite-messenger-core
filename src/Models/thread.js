@@ -57,7 +57,7 @@ class Thread {
    * 
    * @type {string}
    */
-  _lastUpdated
+  _lastUpdatedTime
 
   /**
    * Timestamp of the conversation
@@ -79,14 +79,17 @@ class Thread {
    * @param {object} data
    * @param {} datastore - datastore instance (firebase/mongodb)
    */
-  constructor({ id, participants, startedDate, lastUpdated, timestamp, messages }, datastore) {
+  constructor({ id, participants, startedDate, lastUpdatedTime, timestamp, messages }, datastore) {
+    if (typeof datastore !== 1) {
+      throw new Error(`Error:Thread - the datastore must be an instance of `)
+    }
     this.__datastore = datastore
     this.__isListening = false
     this.__lastMessageId = null
     this._id = id
     this._participants = participants ?? []
     this._startedDate = startedDate ?? new Date().toUTCString()
-    this._lastUpdated = lastUpdated ?? new Date().toUTCString()
+    this._lastUpdatedTime = lastUpdatedTime ?? new Date().toUTCString()
     this._timestamp = timestamp ?? this._setTimestamp()
     this._messages = messages ?? {}
   }
@@ -109,8 +112,8 @@ class Thread {
     return this._startedDate
   }
 
-  getLastUpdated() {
-    return this._lastUpdated
+  getLastUpdatedTime() {
+    return this._lastUpdatedTime
   }
 
   getLastMessageId () {
@@ -136,8 +139,8 @@ class Thread {
     return {
       id: this._id,
       participants: this._participants,
-      started: this._startedDate,
-      lastUpdated: this._lastUpdated,
+      startedDate: this._startedDate,
+      lastUpdatedTime: this._lastUpdatedTime,
       timestamp: this._timestamp,
       //messages : this.messages,
     }
@@ -154,8 +157,12 @@ class Thread {
    * 
    * @param {string|number} lastMessageId
    * @returns {void}
+   * @throws {Error}
   */
   __setLastMessageId(lastMessageId) {
+    if ((typeof lastMessageId !== 'string') && (typeof lastMessageId !== 'number')) {
+      throw new Error(`Error:Thread - Cannot set the lastMessageId. It must be a string or a number, but received ${typeof lastMessageId}`)
+    }
     this.__lastMessageId = lastMessageId
   }
 
@@ -164,19 +171,26 @@ class Thread {
    *
    * @param {string} id participant id
    * @returns {void} void
+   * @throws {Error}
    */
   setParticipants(id) {
+    if ((typeof id !== 'string') && (typeof id !== 'number')) {
+      throw new Error(`Error:Thread - Cannot set the participant id. It must be a string or a number, but received ${typeof id}`)
+    }
     this._participants.push(id)
   }
 
   /**
    * set last updated time in the conversation
    *
-   * @param {string} lastUpdated
+   * @param {string} lastUpdatedTime
    * @returns {void} void
    */
-  _setLastUpdated(lastUpdated) {
-    this._lastUpdated = lastUpdated
+  _setLastUpdatedTime(lastUpdatedTime) {
+    if ((typeof lastUpdatedTime !== 'string')) {
+      throw new Error(`Error:Thread - Cannot set the last updated time. It must be a string or a number, but received ${typeof lastMessageId}`)
+    }
+    this._lastUpdatedTime = lastUpdatedTime
     //... TODO - update last updated in the database too
   }
 
@@ -196,9 +210,10 @@ class Thread {
    * @param {object} data conversation data
    * @returns {void} void
    */
-  update({ participants, lastUpdated }) {
+  _update({ participants, lastUpdated }) {
     this._participants = participants ?? this._participants //... check
-    this._setLastUpdated(lastUpdated ?? this._lastUpdated)
+    this._setLastUpdatedTime(lastUpdated ?? this._lastUpdatedTime)
+    this._setTimestamp()
   }
 
   /** ======================================= */
@@ -210,19 +225,23 @@ class Thread {
    *
    * DOES NOT save messages in the database.
    *
-   * @param {Object} message
+   * @param {Message | object} message
    * @returns {Message} message
+   * @throws {Error}
    */
   __setMessages(message) {
-    this._setTimestamp()
-    this._setLastUpdated(new Date().toUTCString()) //... CHECK - update lastUpdated in the firestore too
-    if (message.id && this._messages[message.id]) {
-      this._messages[message.id].update(message)
-      return this._messages[message.id]
+    if ((typeof message !== Message) && Object.keys(message).length <= 0) {
+      throw new Error(``)
+    }
+
+    if (Object.hasOwn(this._messages, message.getId())) {
+      _message = this._messages[message.getId()]
+      _message.update(message)
+      return _message
     } else {
       let _message = new Message(message)
-      this._messages[_message._id] = _message
-      this.__setLastMessageId(_message._id)
+      this._messages[_message.getId()] = _message
+      this.__setLastMessageId(_message.getId())
       return _message
     }
   }
@@ -234,13 +253,20 @@ class Thread {
    * @param {Function} callback callback function that should be invoked in everytime the messages update
    * @param {String|Number} limit messages limit
    * @returns {void} void
+   * @throws {Error}
    */
   listen(callback) {
+
+    if (typeof callback !== 'function') {
+      throw new Error(`Error:Thread - cannot listen to thread updates. Callback must be a function, but received ${typeof callback}`)
+    }
+
     this.__isListening = true
     this.__datastore.listenToCollection(this._id, (messages) => {
       //... refactor - has a tight coupling with firebase
       messages.forEach((message) => {
         this.__setMessages(message.data())
+        this._update()
       })
     })
 
@@ -258,6 +284,7 @@ class Thread {
    */
   async sendMessage(message) {
     let messageObj = this.__setMessages(message)
+    this._update()
     //... handle errors - set status of the message instance to pending/failed
     await this.__datastore.setMessage(this._id, messageObj)
   }
@@ -269,11 +296,13 @@ class Thread {
    * @returns {void} void
    */
   async deleteMessage(messageId) {
+    if ((typeof messageId == null) || !Object.hasOwn(this._messages, messageId)) {
+      throw new Error(`Error:Thread -  cannot delete message.`)
+    }
     this._messages[messageId] = null
     //... handle errors - set status of the message
     await this.__datastore.deleteMessage(messageId)
-    this._setLastUpdated(new Date().toUTCString())
-
+    this._update()
     //... TODO - update last message
   }
 

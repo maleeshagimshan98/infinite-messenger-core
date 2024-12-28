@@ -132,7 +132,7 @@ class User {
 
     getPermissions () {
         return this._permissions;
-    }    
+    }
 
     /** ============================== */
     
@@ -164,8 +164,12 @@ class User {
      * 
      * @param {string} id user's id
      * @returns {void} void
+     * @throws {Error}
      */
     setId (id) {
+        if ((typeof id !== 'string') || typeof id !== 'number') {
+            throw new Error(`Error:User - cannot set the id. It must be a string or a number but received ${typeof id}`)
+        }
         this._id = id;
     }
 
@@ -188,6 +192,9 @@ class User {
      */
     async setIsActive (status) {
         //... TODO - check - update the database too
+        if (typeof status !== 'boolean') {
+            throw new Error(`Error:User - cannot set the isActive status. It must be a boolean but recieved ${status}`)
+        }
         this._isActive = status;
     }
 
@@ -207,7 +214,7 @@ class User {
     /**
      * set user's permissions
      * 
-     * @param {String} permission - permission
+     * @param {string} permission - permission
      * @returns {void} void
      */
      setPermissions (permission) {
@@ -221,10 +228,17 @@ class User {
      * @returns {void}
      */
     __setLastConversation (conversationId) {
+        if ((typeof id !== 'string') || typeof id !== 'number') {
+            throw new Error(`Error:User - cannot set the last conversation id. It must be a string or a number but received ${typeof conversationId}`)
+        }
         this.__lastConversationId = conversationId;
         // =========================
         //... update datastore too
         // =========================
+    }
+
+    _updateConversation (conversation) {
+        this.__conversations[conversation.getId()].update(conversation);
     }
 
     /**
@@ -235,12 +249,13 @@ class User {
      * @returns {Thread} thread - inserted thread object
      */
      __setConversations (conversation) {
-        if (this.__conversations[conversation.id]) {
-            this.__conversations[conversation.id].update(conversation);
+        //... update parameter type
+        if (this.__conversations[conversation.getId()]) {
+            this._updateConversation(conversation)
         }
         else{
             this.__conversations[conversation.id] = new Thread(conversation,this.__datastore.messages);
-            this.__setLastConversation(conversation.id); 
+            this.__setLastConversation(conversation.getId()); 
         }
         return this.__conversations[conversation.id];                
     }    
@@ -272,7 +287,7 @@ class User {
         //... default threads limit 25 used
         this.__datastore.conversations.listenToConversations(this._conversationsId,threads => {            
             threads.forEach( thread => {
-                this.__setConversations(thread.data());
+                this.__setConversations(thread.data()); //... TODO - has tight coupling with firebase
             });
             callback(threads);
         });        
