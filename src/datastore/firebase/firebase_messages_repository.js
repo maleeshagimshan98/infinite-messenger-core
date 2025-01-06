@@ -15,13 +15,12 @@ class firebaseMessagesRepository extends firebaseRepositoryBase {
    *
    * @param {string} conversationId - conversation id
    * @param {string|null} start - starting point
-   * @returns {Promise <array | bool>}
+   * @returns {Promise <array>}
    */
   async getMessages(conversationId, start = null) {
     collectionQuery = this.__buildCollectionQuery(conversationId, "timestamp", "desc", start)
     let conversations = await collectionQuery.get()
-    //... TODO - handle errors
-    return conversations.empty ? false : this.__getDataFromCollection(conversations)
+    return this.__getDataFromCollection(conversations)
   }
 
   /**
@@ -37,7 +36,6 @@ class firebaseMessagesRepository extends firebaseRepositoryBase {
       .collection(conversationId)
       .doc(message.getId())
       .set(message.toObj(), { merge: true })
-    //... TODO - handle errors
   }
 
   /**

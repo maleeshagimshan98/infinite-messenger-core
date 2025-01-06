@@ -1,12 +1,13 @@
 /**
  * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
+const { firestore } = require("firebase-admin")
 const firebaseRepositoryBase = require("./firebase_repository_base")
 
 class firebaseConversationsRepository extends firebaseRepositoryBase {
   /**
    *
-   * @param {*} db
+   * @param {firestore} db
    */
   constructor(db) {
     super(db)
@@ -18,7 +19,7 @@ class firebaseConversationsRepository extends firebaseRepositoryBase {
    *
    * @param {string} conversationsId conversation id
    * @param {string|Null} start starting document id
-   * @returns {Promise <array|Boolean>}
+   * @returns {Promise <array>}
    */
   async getConversations(conversationsId, start = null) {
     let collectionQuery = this._db
@@ -27,8 +28,7 @@ class firebaseConversationsRepository extends firebaseRepositoryBase {
       .startAt(start)
       .limit(this._limit)
     let conversations = await collectionQuery.get()
-    //... TODO - handle errors
-    return conversations.empty ? false : this.__getDataFromCollection(conversations)
+    return this.__getDataFromCollection(conversations)
   }
 
   /**
@@ -51,7 +51,6 @@ class firebaseConversationsRepository extends firebaseRepositoryBase {
         .doc(conversation.getId())
         .set(conversation.toObj(), { merge: true })
     )
-    //... TODO - handle errors
   }
 
   /**
