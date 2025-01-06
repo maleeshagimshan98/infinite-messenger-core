@@ -15,12 +15,13 @@ class firebaseUsersRepository extends firebaseRepositoryBase {
      * get array of users from firebase collection
      * get results from given point if start is provided
      * 
-     * @param {String|Null} start starting point
-     * @returns {Array|Boolean}
+     * @param {string|null} start starting point
+     * @returns {Promise <array|Boolean>}
      */
     async getUsers (start=null) {
         collectionQuery = this.__buildCollectionQuery(this.__userCollectionName,'id','asc',start);
         let users = await collectionQuery.get();
+        //... TODO - handle errors
         return users.empty ? false : this.__getDataFromCollection(users);
     }
 
@@ -29,9 +30,10 @@ class firebaseUsersRepository extends firebaseRepositoryBase {
      * writes data in a batch
      * 
      * @param {Array<User>} users - array of users
-     * @returns {void} void
+     * @returns {Promise<void>} void
      */
     async setUsers (users) {
+        //... TODO - handle errors
         let batch = this.batch();
         users.forEach (user => {
             batch.set(this.db.collection(this.__userCollectionName).doc(user.getId()).set(user.toObj()));
@@ -43,10 +45,11 @@ class firebaseUsersRepository extends firebaseRepositoryBase {
      * get a single user, returns false if user not exists
      * 
      * @param {String} userId user's id
-     * @returns {Object|Boolean} user
+     * @returns {Promise<object|Boolean>} user
      */
     async getUser (userId) {
-        return await this.__doc(this.__userCollectionName,userId);         
+        return await this.__doc(this.__userCollectionName,userId);
+        //... TODO - handle errors       
     }
 
     /**
@@ -54,10 +57,11 @@ class firebaseUsersRepository extends firebaseRepositoryBase {
      * updates the user if user exists
      * 
      * @param {User} user
-     * @returns {void} void
+     * @returns {Promise<void>} void
      */
     async setUser (user) {
         await this.db.collection(this.__userCollectionName).doc(user.getId()).set(user.toObj(),{merge : true});
+        //... TODO - handle errors
     }
 
     /**

@@ -18,7 +18,7 @@ class firebaseRepositoryBase {
     /**
      * set document limit
      * 
-     * @param {String|Number} limit
+     * @param {string|number} limit
      * @returns {void} void 
      */
     setLimit (limit) {
@@ -39,7 +39,7 @@ class firebaseRepositoryBase {
     /**
      * commit a batch write
      * 
-     * @returns {void} void
+     * @returns {Promise<void>} void
      */
     async commit () {
         this.__isBatchWriting = false;
@@ -49,7 +49,7 @@ class firebaseRepositoryBase {
     /**
       * stop listening to a particular conversations/messages
       * 
-      * @param {String} listenerName name of the listener
+      * @param {string} listenerName name of the listener
       * @returns {void} void
       */
      detach (listenerName) {
@@ -72,9 +72,9 @@ class firebaseRepositoryBase {
      * if the collection is previousely accessed, get the results after the cursor set by previous query.
      * All results are limited to the set amount in ```` this.limit ````
      * 
-     * @param {String} collectionName name of collection
-     * @param {String} sort field of the document to sort
-     * @param {String} order sort order (ascending, descending)
+     * @param {string} collectionName name of collection
+     * @param {string} sort field of the document to sort
+     * @param {string} order sort order (ascending, descending)
      * @returns {CollectionReference} collection Query
      */
     __buildCollectionQuery (collectionName,sort='timestamp',order='desc',start = null) {
@@ -87,7 +87,7 @@ class firebaseRepositoryBase {
             collectionQuery = this.db.collection(collectionName).orderBy(sort,order).limit(this.limit); 
         }
         return collectionQuery;                
-    }    
+    }
 
     /**
      * extract data from a collection
@@ -108,9 +108,9 @@ class firebaseRepositoryBase {
       * get a document from firestore collection
       * returns false if document does not exists
       * 
-      * @param {String} collectionName name of the collection
-      * @param {String} docId document id
-      * @returns {Object|Boolean} 
+      * @param {string} collectionName name of the collection
+      * @param {string} docId document id
+      * @returns {Promise<object|Boolean>} 
       */
     async __doc (collectionName,docId) {         
         let document = await this.db.collection(collectionName).doc(docId).get();
@@ -120,9 +120,10 @@ class firebaseRepositoryBase {
     /**
      * write a document
      * 
-     * @param {String} collectionName 
-     * @param {String} docId 
-     * @param {Object} data 
+     * @param {string} collectionName 
+     * @param {string} docId 
+     * @param {object} data
+     * @returns {Promise<void>} void
      */
     async __setDoc (collectionName,docId,data) {
         this.db.collection(collectionName).doc(docId).set(data);

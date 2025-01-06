@@ -14,13 +14,14 @@ class firebaseMessagesRepository extends firebaseRepositoryBase {
      * get messages from firebase
      * get results from given point if start is provided
      * 
-     * @param {String} conversationId - conversation id
-     * @param {String|Null} start - starting point
-     * @returns {Array | Boolean}
+     * @param {string} conversationId - conversation id
+     * @param {string|null} start - starting point
+     * @returns {Promise <array | bool>}
      */
     async getMessages (conversationId,start=null) {
         collectionQuery = this.__buildCollectionQuery(conversationId,'timestamp','desc',start);
         let conversations = await collectionQuery.get();
+        //... TODO - handle errors
         return conversations.empty ? false : this.__getDataFromCollection(conversations);
     }
 
@@ -28,19 +29,21 @@ class firebaseMessagesRepository extends firebaseRepositoryBase {
      * add a message to messages collection
      * updates the message if message exists
      * 
-     * @param {String} conversationId - conversation id
+     * @param {string} conversationId - conversation id
      * @param {Message} message message object
-     * @returns {void} void
+     * @returns {Promise<void>} Promise <void>
      */
     async setMessage (conversationId,message) {
         await this.db.collection(conversationId).doc(message.getId()).set(message.toObj(),{merge : true});
+        //... TODO - handle errors
     }
 
     /**
       * listen to new messages (latest 25)
       * 
-      * @param {String} conversationId conversation's id
+      * @param {string} conversationId conversation's id
       * @param {Function} callback callback function that should be invoked whenever the document change
+      * @returns {void} void
       */
     listenToMessages (conversationId,callback) {
         let collectionQuery = this.db.collection(conversationsId).orderBy("timestamp","desc").limit(this.limit);

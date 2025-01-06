@@ -17,13 +17,14 @@ class firebaseConversationsRepository extends firebaseRepositoryBase {
      * get array of conversations from firebase
      * get results from given point if start is provided
      * 
-     * @param {String} conversationsId conversation id
-     * @param {String|Null} start starting document id 
-     * @returns {Array|Boolean}
+     * @param {string} conversationsId conversation id
+     * @param {string|Null} start starting document id 
+     * @returns {Promise <array|Boolean>}
      */
     async getConversations (conversationsId,start = null) {
         let collectionQuery = this.db.collection(conversationsId).orderBy(conversationsId,"desc").startAt(start).limit(this.limit);
         let conversations = await collectionQuery.get();
+        //... TODO - handle errors
         return conversations.empty ? false : this.__getDataFromCollection(conversations);
     }
 
@@ -42,12 +43,13 @@ class firebaseConversationsRepository extends firebaseRepositoryBase {
             //... throw error
        }
        this.__batch.set(this.db.collection(user.getConversationsId()).doc(conversation.getId()).set(conversation.toObj(),{merge : true}));
+       //... TODO - handle errors
     }
 
     /**
       * listen to changes (new addition, deletion) in the user's conversations (latest 25)
       * 
-      * @param {String} conversationsId user's conversations id
+      * @param {string} conversationsId user's conversations id
       * @param {Function} callback callback function, that should be invoked  whenever the collection change
       * @returns {void} void
       */

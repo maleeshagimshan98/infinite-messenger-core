@@ -52,7 +52,7 @@ class User {
     _permissions
 
     /**
-     * Usre's unique id for his conversations
+     * User's unique id for his conversations
      * 
      * @type {string}
      */
@@ -68,7 +68,7 @@ class User {
     /**
      * User's conversations
      * 
-     * @type {array<Thread>}
+     * @type {object<Thread>}
      */
     __conversations
 
@@ -126,6 +126,10 @@ class User {
         return this._conversationsId;
     }
 
+    getLastConversationId () {
+        return this.__lastConversationId;
+    }
+
     conversations () {
         return this.__conversations;
     }
@@ -150,6 +154,7 @@ class User {
             isActive : this._isActive,
             permissions : this._permissions,
             conversationsId : this._conversationsId,
+            lastConversationId : this.__lastConversationId
         };
     }
 
@@ -202,7 +207,7 @@ class User {
      * set last seen time of user
      * 
      * @param {string} time - last seen time
-     * @returns {void} void
+     * @returns {async<void>} void
      */
     async setLastSeen(time) {
         this._lastSeen = time;
@@ -236,7 +241,13 @@ class User {
         //... update datastore too
         // =========================
     }
-
+    
+    /**
+     * Updates the conversation
+     * 
+     * @param {object | Thread} conversation
+     * @return {void} void
+     */
     _updateConversation (conversation) {
         this.__conversations[conversation.getId()].update(conversation);
     }
@@ -266,7 +277,9 @@ class User {
      * @returns {Promise<object>} user's conversations
      */
     async getConversations () {
-        let conversations = await this.__datastore.conversations.getConversations(this._conversationsId,this.__lastConversationId);
+        let conversations = await this.__datastore.conversations.getConversations(this._conversationsId,this.__lastConversationId).catch(err => {
+            //... handle error
+        });
         
         //... if no conversation is found, conversations is false.
         if (conversations) {
@@ -290,6 +303,8 @@ class User {
                 this.__setConversations(thread.data()); //... TODO - has tight coupling with firebase
             });
             callback(threads);
+        }, (error) => {
+            //... handle error
         });        
     }
 
@@ -306,12 +321,15 @@ class User {
      * start a new conversation
      * saves the new conversation in the database
      * 
-     * @param {Object} thread thread data
+     * @param {object} thread thread data
      * @returns {Promise<Thread>} created conversation object 
      */
     async startConversation (thread) {
         let conversation = this.__setConversations(thread);   
-        await this.__datastore.conversations.setConversation(conversation);
+        //... TODO - remove the coupling to the Thread model in datastore modules, use dependancy inversion
+        await this.__datastore.conversations.setConversation(conversation).catch( error => {
+            //... handle error
+        });
         return conversation;
     }
 
@@ -321,7 +339,9 @@ class User {
      * @returns {Promise<void>} Promise
      */
      async updateUser () {        
-        await this.__datastore.user.updateUser(this); //... check
+        await this.__datastore.user.updateUser(this).catch(error => {
+            //... handle error
+        }); //... check
     }
 };
 

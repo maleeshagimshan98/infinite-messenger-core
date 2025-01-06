@@ -31,8 +31,8 @@ class MessengerCore {
   /**
    * initialise datastore
    *
-   * @param {string} dbDriver
-   * @param {string} dbConfig - Path to google application credentials
+   * @param {string} dbDriver - Database driver ("firebase", "mongodb")
+   * @param {string} dbConfig - Path to database configuration
    * @returns {void} void
    */
   __initDataStore(dbDriver, dbConfig) {
