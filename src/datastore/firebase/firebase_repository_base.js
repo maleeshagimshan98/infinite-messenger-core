@@ -3,6 +3,7 @@
  */
 
 const { firestore } = require("firebase-admin")
+const DatabaseResult = require("../utils/DatabaseResult")
 
 class firebaseRepositoryBase {
 
@@ -86,6 +87,7 @@ class firebaseRepositoryBase {
   async commit() {
     this.__isBatchWriting = false
     await this.__batch.commit().catch((error) => {
+        //... TODO - rollback?
         throw new Error(`Error:firebaseRepositoryBase - ${error.message}`)
     })
   }
@@ -127,32 +129,37 @@ class firebaseRepositoryBase {
    * @param {string} sort field of the document to sort
    * @param {string} order sort order (ascending, descending)
    * @returns {CollectionReference} collection Query
-   * @throws {Error} if collectionName is not provided
+   * @throws {Error}
    */
   __buildCollectionQuery(collectionName, sort = "timestamp", order = "desc", start = null) {
     if (!collectionName) {
         throw new Error(`Error:firebaseRepositoryBase - collection name is required.`)
     }
     let collectionQuery
-    if (start) {
+    try{
+        if (start) {
       //... change
       collectionQuery = this._db.collection(collectionName).orderBy(sort, order).limit(this._limit)
     } else {
       collectionQuery = this._db.collection(collectionName).orderBy(sort, order).limit(this._limit)
     }
     return collectionQuery
+    }
+    catch (error) {
+        throw new Error(`Error:firebaseRepositoryBase - ${error.message}`)
+    }
   }
 
   /**
    * extract data from a collection
    * returns false if collection is empty
    *
-   * @param {QuerySnapshot} collection
+   * @param {CollectionReference} collection
    * @returns {array}
    * @throws {Error} if collection is not provided
    */
   __getDataFromCollection(collection) {
-    if (!collecrion) {
+    if (!collection) {
         throw new Error(`Error:firebaseRepositoryBase - collection is required.`)
     }
     let docsArr = []
@@ -168,7 +175,7 @@ class firebaseRepositoryBase {
    *
    * @param {string} collectionName name of the collection
    * @param {string} docId document id
-   * @returns {Promise<object|Boolean>}
+   * @returns {Promise<DatabaseResult>}
    * @throws {Error} if collectionName or docId is not provided
    */
   async __doc(collectionName, docId) {
@@ -178,8 +185,8 @@ class firebaseRepositoryBase {
     if (!docId) {
         throw new Error(`Error:firebaseRepositoryBase - document id is required.`)
     }
-    let document = await this._db.collection(collectionName).doc(docId).get() //... TODO - handle errors
-    return document.exists ? document.data() : false
+    let document = await this._db.collection(collectionName).doc(docId).get()
+    return new DatabaseResult(document.exists ? document.data() : {})
   }
 
   /**
@@ -201,7 +208,7 @@ class firebaseRepositoryBase {
     if (!data) {
         throw new Error(`Error:firebaseRepositoryBase - data is required.`)
     }
-    this._db.collection(collectionName).doc(docId).set(data) //... TODO - handle errors
+    this._db.collection(collectionName).doc(docId).set(data)
   }
 }
 

@@ -2,6 +2,7 @@
  * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
+const DatabaseResult = require("../utils/DatabaseResult")
 const firebaseRepositoryBase = require("./firebase_repository_base")
 
 class firebaseUsersRepository extends firebaseRepositoryBase {
@@ -15,24 +16,22 @@ class firebaseUsersRepository extends firebaseRepositoryBase {
    * get results from given point if start is provided
    *
    * @param {string|null} start starting point
-   * @returns {Promise <array|Boolean>}
+   * @returns {Promise <array>}
    */
   async getUsers(start = null) {
     collectionQuery = this.__buildCollectionQuery(this.__userCollectionName, "id", "asc", start)
     let users = await collectionQuery.get()
-    //... TODO - handle errors
-    return users.empty ? false : this.__getDataFromCollection(users)
+    return this.__getDataFromCollection(users)
   }
 
   /**
    * add multiple users to firebase collection
    * writes data in a batch
    *
-   * @param {Array<User>} users - array of users
+   * @param {array<User>} users - array of users
    * @returns {Promise<void>} void
    */
   async setUsers(users) {
-    //... TODO - handle errors
     let batch = this.batch()
     users.forEach((user) => {
       batch.set(this._db.collection(this.__userCollectionName).doc(user.getId()).set(user.toObj()))
@@ -43,12 +42,16 @@ class firebaseUsersRepository extends firebaseRepositoryBase {
   /**
    * get a single user, returns false if user not exists
    *
-   * @param {String} userId user's id
-   * @returns {Promise<object|Boolean>} user
+   * @param {string} userId user's id
+   * @returns {Promise<DatabaseResult>} user
+   * @throws {Error}
    */
   async getUser(userId) {
-    return await this.__doc(this.__userCollectionName, userId)
-    //... TODO - handle errors
+    let dbResult = await this.__doc(this.__userCollectionName, userId)
+    if (!dbResult.hasData()) {
+      throw new Error(`Error:firebaseUserRepository - cannot find a user with the id ${userId}`)
+    }
+    return dbResult.data()
   }
 
   /**
@@ -63,7 +66,6 @@ class firebaseUsersRepository extends firebaseRepositoryBase {
       .collection(this.__userCollectionName)
       .doc(user.getId())
       .set(user.toObj(), { merge: true })
-    //... TODO - handle errors
   }
 
   /**
