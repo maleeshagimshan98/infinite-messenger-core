@@ -4,10 +4,11 @@
 
 import { Firestore } from "firebase-admin/firestore"
 import DatabaseResult from "../utils/DatabaseResult"
+import { UsersRepositroy } from "../interfaces/repository"
 import FirebaseRepositoryBase from "./firebase_repository_base"
-import User from "../../Models/user"
+import {User} from "../../Models/user"
 
-class FirebaseUsersRepository extends FirebaseRepositoryBase {
+class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRepositroy {
 
   /**
    * user collection name
@@ -25,10 +26,10 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase {
    * get array of users from firebase collection
    * get results from given point if start is provided
    *
-   * @param {string|null} start starting point
+   * @param {number|null} start starting point
    * @returns {Promise<Record<string, any>[]>} users
    */
-  async getUsers(start = null): Promise<Record<string, any>[]> {
+  async getUsers(start: number|null = null): Promise<Record<string, any>[]> {
     let collectionQuery = this.__buildCollectionQuery(this.__userCollectionName, "id", "asc", start)
     let users = await collectionQuery.get()
     return this.__getDataFromCollection(users)
@@ -38,7 +39,7 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase {
    * add multiple users to firebase collection
    * writes data in a batch
    *
-   * @param {array<User>} users - array of users
+   * @param {User[]} users - array of users
    * @returns {Promise<void>} void
    */
   async setUsers(users: User[]): Promise<void> {

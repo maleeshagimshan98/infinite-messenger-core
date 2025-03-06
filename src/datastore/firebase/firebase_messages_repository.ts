@@ -3,11 +3,11 @@
  */
 
 import { Firestore } from "firebase-admin/firestore";
-
-import firebaseRepositoryBase from "./firebase_repository_base";
+import { MessagesRepository } from "../interfaces/repository";
+import FirebaseRepositoryBase from "./firebase_repository_base";
 import { Message } from "../../Models/message";
 
-class firebaseMessagesRepository extends firebaseRepositoryBase {
+class FirebaseMessagesRepository extends FirebaseRepositoryBase implements MessagesRepository {
 
   constructor(db: Firestore) {
     super(db);
@@ -70,4 +70,4 @@ class firebaseMessagesRepository extends firebaseRepositoryBase {
   }
 }
 
-module.exports = firebaseMessagesRepository;
+export default FirebaseMessagesRepository;

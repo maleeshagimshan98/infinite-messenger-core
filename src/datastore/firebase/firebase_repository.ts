@@ -2,51 +2,51 @@
  * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import { initializeApp, applicationDefault, cert } from 'firebase-admin/app';
-import { getFirestore, Timestamp, FieldValue, Firestore } from 'firebase-admin/firestore';
-import firebaseUserRepository from "./firebase_users_repository";
-import firebaseConversationRepository from "./firebase_conversations_repository";
-import firebaseMessagesRepository from "./firebase_messages_repository";
+import { initializeApp, applicationDefault, cert } from "firebase-admin/app"
+import { getFirestore, Timestamp, FieldValue, Firestore } from "firebase-admin/firestore"
+import Datastore from "../interfaces/datastore"
+import FirebaseUsersRepository from "./firebase_users_repository"
+import FirebaseConversationsRepository from "./firebase_conversations_repository"
+import FirebaseMessagesRepository from "./firebase_messages_repository"
 
-class firebaseRepository {
-
+class FirebaseRepository implements Datastore {
   /**
    * Firestore database instance.
-   * 
+   *
    * @type {Firestore}
    */
-  private __db: Firestore;
+  private __db: Firestore
 
   /**
    * User repository.
-   * 
+   *
    * @type {firebaseUserRepository}
    */
-  public __user: firebaseUserRepository;
+  public __user: FirebaseUsersRepository
 
   /**
    * Conversation repository.
-   * 
+   *
    * @type {firebaseConversationRepository}
    */
-  public __conversations: firebaseConversationRepository;
+  public __conversations: FirebaseConversationsRepository
 
   /**
    * Messages repository.
-   * 
+   *
    * @type {firebaseMessagesRepository}
    */
-  public __messages: firebaseMessagesRepository;
+  public __messages: FirebaseMessagesRepository
 
-  constructor(firebaseConfig: Record<string, any>) {
+  constructor(firebaseConfig: string) {
     const app = initializeApp({
       credential: cert(firebaseConfig),
-    });
-    this.__db = getFirestore();
-    this.__user = new firebaseUserRepository(this.__db);
-    this.__conversations = new firebaseConversationRepository(this.__db);
-    this.__messages = new firebaseMessagesRepository(this.__db);
+    })
+    this.__db = getFirestore()
+    this.__user = new FirebaseUsersRepository(this.__db)
+    this.__conversations = new FirebaseConversationsRepository(this.__db)
+    this.__messages = new FirebaseMessagesRepository(this.__db)
   }
 }
 
-export default firebaseRepository;
+export default FirebaseRepository

@@ -2,12 +2,13 @@
  * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
 */
 
-import { Firestore } from "firebase-admin/firestore";
+import { Firestore, QuerySnapshot } from "firebase-admin/firestore";
+import { ConversationsRepository } from "../interfaces/repository";
 import firebaseRepositoryBase from "./firebase_repository_base";
-import User from "../../Models/user";
+import {User} from "../../Models/user";
 import { Conversation, Thread } from "../../Models/thread";
 
-class firebaseConversationsRepository extends firebaseRepositoryBase {
+class FirebaseConversationsRepository extends firebaseRepositoryBase implements ConversationsRepository {
 
   /**
    * constructor
@@ -61,20 +62,20 @@ class firebaseConversationsRepository extends firebaseRepositoryBase {
    * @param {Function} callback callback function, that should be invoked  whenever the collection change
    * @returns {void} void
    */
-  listenToConversations(conversationsId: string, callback: Function, errorCallback: Function): void {
+  listenToConversations(conversationsId: string, callback: (data: Record<string, any>| false) => void, errorCallback: (error: Error) => void): void {
     let collectionQuery = this._db
       .collection(conversationsId)
       .orderBy("timestamp", "desc")
       .limit(this._limit);
     this.__listeners[conversationsId] = collectionQuery.onSnapshot(
-      (snapshot) => {
+      (snapshot: QuerySnapshot) => {
         callback(snapshot.empty ? false : snapshot.docs);
       },
-      (error) => {
+      (error: Error) => {
         errorCallback(error);
       },
     );
   }
 }
 
-module.exports = firebaseConversationsRepository;
+export default FirebaseConversationsRepository;
