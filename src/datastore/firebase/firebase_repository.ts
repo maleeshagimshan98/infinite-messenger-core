@@ -47,6 +47,18 @@ class FirebaseRepository implements Datastore {
     this.__conversations = new FirebaseConversationsRepository(this.__db)
     this.__messages = new FirebaseMessagesRepository(this.__db)
   }
+
+  get user() {
+    return this.__user
+  }
+
+  get conversations() {
+    return this.__conversations
+  }
+
+  get messages() {
+    return this.__messages
+  }
 }
 
 export default FirebaseRepository
