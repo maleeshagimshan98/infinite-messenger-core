@@ -2,11 +2,21 @@
  * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-const DatabaseResult = require("../utils/DatabaseResult")
-const firebaseRepositoryBase = require("./firebase_repository_base")
+import { Firestore } from "firebase-admin/firestore"
+import DatabaseResult from "../utils/DatabaseResult"
+import FirebaseRepositoryBase from "./firebase_repository_base"
+import User from "../../Models/user"
 
-class firebaseUsersRepository extends firebaseRepositoryBase {
-  constructor(db) {
+class FirebaseUsersRepository extends FirebaseRepositoryBase {
+
+  /**
+   * user collection name
+   * 
+   * @type {string}
+   */
+  __userCollectionName: string
+
+  constructor(db: Firestore) {
     super(db)
     this.__userCollectionName = "users"
   }
@@ -16,10 +26,10 @@ class firebaseUsersRepository extends firebaseRepositoryBase {
    * get results from given point if start is provided
    *
    * @param {string|null} start starting point
-   * @returns {Promise <array>}
+   * @returns {Promise<Record<string, any>[]>} users
    */
-  async getUsers(start = null) {
-    collectionQuery = this.__buildCollectionQuery(this.__userCollectionName, "id", "asc", start)
+  async getUsers(start = null): Promise<Record<string, any>[]> {
+    let collectionQuery = this.__buildCollectionQuery(this.__userCollectionName, "id", "asc", start)
     let users = await collectionQuery.get()
     return this.__getDataFromCollection(users)
   }
@@ -31,10 +41,10 @@ class firebaseUsersRepository extends firebaseRepositoryBase {
    * @param {array<User>} users - array of users
    * @returns {Promise<void>} void
    */
-  async setUsers(users) {
+  async setUsers(users: User[]): Promise<void> {
     let batch = this.batch()
     users.forEach((user) => {
-      batch.set(this._db.collection(this.__userCollectionName).doc(user.getId()).set(user.toObj()))
+      batch.set(this._db.collection(this.__userCollectionName).doc(user.getId()),user.toObj())
     })
     await batch.commit()
   }
@@ -43,10 +53,10 @@ class firebaseUsersRepository extends firebaseRepositoryBase {
    * get a single user, returns false if user not exists
    *
    * @param {string} userId user's id
-   * @returns {Promise<DatabaseResult>} user
+   * @returns {Promise<Record<string, any>>} user
    * @throws {Error}
    */
-  async getUser(userId) {
+  async getUser(userId: string): Promise<Record<string, any>> {
     let dbResult = await this.__doc(this.__userCollectionName, userId)
     if (!dbResult.hasData()) {
       throw new Error(`Error:firebaseUserRepository - cannot find a user with the id ${userId}`)
@@ -61,7 +71,7 @@ class firebaseUsersRepository extends firebaseRepositoryBase {
    * @param {User} user
    * @returns {Promise<void>} void
    */
-  async setUser(user) {
+  async setUser(user: User): Promise<void> {
     await this._db
       .collection(this.__userCollectionName)
       .doc(user.getId())
@@ -74,7 +84,9 @@ class firebaseUsersRepository extends firebaseRepositoryBase {
    * @param {User} user
    * @returns {void} void
    */
-  async updateUser(user) {}
+  async updateUser(user: User) {
+    //... TODO
+  }
 }
 
-module.exports = firebaseUsersRepository
+export default FirebaseUsersRepository
