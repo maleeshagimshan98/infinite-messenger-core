@@ -60,13 +60,7 @@ class Message {
     content,
     time,
     timestamp,
-  }: {
-    id?: string;
-    senderId: string;
-    content?: string;
-    time?: string;
-    timestamp?: number;
-  }) {
+  }: NewMessage) {
     this._id = id ?? new Date().getTime().toString();
 
     if (senderId == null) {
