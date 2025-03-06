@@ -13,7 +13,7 @@ class FirebaseRepositoryBase {
    *
    * @type {string}
    */
-  private _limit;
+  protected _limit;
 
   /**
    * Batch write object
@@ -27,14 +27,14 @@ class FirebaseRepositoryBase {
    *
    * @type {boolean}
    */
-  private __isBatchWriting: boolean;
+  protected __isBatchWriting: boolean;
 
   /**
    * Listeners for the conversations/messages
    *
    * @type {Record<string, any>}
    */
-  private __listeners: Record<string, any>;
+  protected __listeners: Record<string, any>;
 
   /**
    * firestore database object
@@ -157,7 +157,7 @@ class FirebaseRepositoryBase {
         collectionQuery = this._db
           .collection(collectionName)
           .orderBy(sort, order)
-          .offset(start)
+          .offset(start??0)
           .limit(this._limit);
       } else {
         collectionQuery = this._db
