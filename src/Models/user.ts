@@ -124,39 +124,39 @@ class User {
    * =============================
    */
 
-  getId() {
+  getId(): string {
     return this._id
   }
 
-  getName() {
+  getName(): string {
     return this._name
   }
 
-  getProfileImg() {
+  getProfileImg(): string {
     return this._profileImg
   }
 
-  getIsActive() {
+  getIsActive(): boolean {
     return this._isActive
   }
 
-  getLastSeen() {
+  getLastSeen(): string {
     return this._lastSeen
   }
 
-  getConversationsId() {
+  getConversationsId(): string {
     return this._conversationsId
   }
 
-  getLastConversationId() {
+  getLastConversationId(): string | null {
     return this.__lastConversationId
   }
 
-  conversations() {
+  conversations(): Record<string, Thread> {
     return this.__conversations
   }
 
-  getPermissions() {
+  getPermissions(): string[] {
     return this._permissions
   }
 
@@ -364,4 +364,4 @@ class User {
   }
 }
 
-module.exports = User
+export default User
