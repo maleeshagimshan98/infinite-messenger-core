@@ -1,16 +1,21 @@
 /**
  * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
- */
-const { firestore } = require("firebase-admin")
-const firebaseRepositoryBase = require("./firebase_repository_base")
+*/
+
+import { Firestore } from "firebase-admin/firestore";
+import firebaseRepositoryBase from "./firebase_repository_base";
+import User from "../../Models/user";
+import { Conversation, Thread } from "../../Models/thread";
 
 class firebaseConversationsRepository extends firebaseRepositoryBase {
+
   /**
-   *
-   * @param {firestore} db
+   * constructor
+   * 
+   * @param {Firestore} db
    */
-  constructor(db) {
-    super(db)
+  constructor(db: Firestore) {
+    super(db);
   }
 
   /**
@@ -18,17 +23,17 @@ class firebaseConversationsRepository extends firebaseRepositoryBase {
    * get results from given point if start is provided
    *
    * @param {string} conversationsId conversation id
-   * @param {string|Null} start starting document id
+   * @param {number|null} start starting document id
    * @returns {Promise <array>}
    */
-  async getConversations(conversationsId, start = null) {
+  async getConversations(conversationsId: string, start: number|null = null): Promise <Record<string, any>[]> {
     let collectionQuery = this._db
       .collection(conversationsId)
       .orderBy(conversationsId, "desc")
       .startAt(start)
-      .limit(this._limit)
-    let conversations = await collectionQuery.get()
-    return this.__getDataFromCollection(conversations)
+      .limit(this._limit);
+    let conversations = await collectionQuery.get();
+    return this.__getDataFromCollection(conversations);
   }
 
   /**
@@ -41,16 +46,12 @@ class firebaseConversationsRepository extends firebaseRepositoryBase {
    * @param {Thread} conversation conversation object
    * @returns {void} void
    */
-  setConversation(user, conversation) {
-    if (!this.__isBatchWriting) {
-      //... throw error
-    }
-    this.__batch.set(
+  setConversation(user: User, conversation: Thread): void {
+    this.batch().set(
       this._db
         .collection(user.getConversationsId())
-        .doc(conversation.getId())
-        .set(conversation.toObj(), { merge: true })
-    )
+        .doc(conversation.getId()),
+        conversation.toObj(), { merge: true });
   }
 
   /**
@@ -60,20 +61,20 @@ class firebaseConversationsRepository extends firebaseRepositoryBase {
    * @param {Function} callback callback function, that should be invoked  whenever the collection change
    * @returns {void} void
    */
-  listenToConversations(conversationsId, callback) {
+  listenToConversations(conversationsId: string, callback: Function, errorCallback: Function): void {
     let collectionQuery = this._db
       .collection(conversationsId)
       .orderBy("timestamp", "desc")
-      .limit(this._limit)
+      .limit(this._limit);
     this.__listeners[conversationsId] = collectionQuery.onSnapshot(
       (snapshot) => {
-        callback(snapshot.empty ? false : snapshot.docs)
+        callback(snapshot.empty ? false : snapshot.docs);
       },
       (error) => {
-        //false; //... check
-      }
-    )
+        errorCallback(error);
+      },
+    );
   }
 }
 
-module.exports = firebaseConversationsRepository
+module.exports = firebaseConversationsRepository;
