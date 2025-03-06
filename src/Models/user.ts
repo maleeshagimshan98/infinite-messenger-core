@@ -1,5 +1,5 @@
 /**
- * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
+ * Copyright - 2025 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
 import {Thread, Conversation} from "./thread";
