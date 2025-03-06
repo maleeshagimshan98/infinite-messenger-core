@@ -60,7 +60,7 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
   async getUser(userId: string): Promise<Record<string, any>> {
     let dbResult = await this.__doc(this.__userCollectionName, userId)
     if (!dbResult.hasData()) {
-      throw new Error(`Error:firebaseUserRepository - cannot find a user with the id ${userId}`)
+      throw new Error(`Error:FirebaseUserRepository - cannot find a user with the id ${userId}`)
     }
     return dbResult.data()
   }
