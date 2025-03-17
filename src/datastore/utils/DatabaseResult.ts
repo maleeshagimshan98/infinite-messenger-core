@@ -3,17 +3,16 @@
  */
 
 class DatabaseResult {
-
   /**
    * Data object.
-   * 
+   *
    * @type {Record<string, any>}
    */
   private _data: Record<string, any> = {};
 
   /**
    * Indicates if data is present.
-   * 
+   *
    * @type {boolean}
    */
   private _hasData: boolean = false;

@@ -3,11 +3,11 @@
  */
 
 type NewMessage = {
-  id?: string, 
-  senderId: string, 
-  content?: string, 
-  time?: string, 
-  timestamp?: number
+  id?: string;
+  senderId: string;
+  content?: string;
+  time?: string;
+  timestamp?: number;
 };
 
 /**
@@ -54,13 +54,7 @@ class Message {
    *
    * @param {object}
    */
-  constructor({
-    id,
-    senderId,
-    content,
-    time,
-    timestamp,
-  }: NewMessage) {
+  constructor({ id, senderId, content, time, timestamp }: NewMessage) {
     this._id = id ?? new Date().getTime().toString();
 
     if (senderId == null) {
@@ -69,7 +63,7 @@ class Message {
       );
     }
     this._senderId = senderId;
-    this._content = content ?? "";
+    this._content = content ?? '';
     this._time = time ?? new Date().toUTCString();
     this._timestamp = timestamp ?? new Date().getTime();
   }
@@ -154,7 +148,7 @@ class Message {
    * @throws {TypeError}
    */
   setContent(message: string): void {
-    if (typeof message !== "string") {
+    if (typeof message !== 'string') {
       throw new TypeError(
         `Error:Message - Cannot set the message content, it must be a string, but received ${typeof message}.`,
       );
@@ -163,4 +157,4 @@ class Message {
   }
 }
 
-export {Message, NewMessage};
+export { Message, NewMessage };

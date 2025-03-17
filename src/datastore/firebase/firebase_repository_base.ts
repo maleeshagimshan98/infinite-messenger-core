@@ -2,12 +2,27 @@
  * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import { initializeApp, applicationDefault, cert, FirebaseError } from 'firebase-admin/app';
-import { getFirestore, Timestamp, FieldValue, Firestore, WriteBatch, Query, OrderByDirection, DocumentSnapshot, QuerySnapshot, QueryDocumentSnapshot } from 'firebase-admin/firestore';
-import DatabaseResult from "../utils/DatabaseResult";
+import {
+  initializeApp,
+  applicationDefault,
+  cert,
+  FirebaseError,
+} from 'firebase-admin/app';
+import {
+  getFirestore,
+  Timestamp,
+  FieldValue,
+  Firestore,
+  WriteBatch,
+  Query,
+  OrderByDirection,
+  DocumentSnapshot,
+  QuerySnapshot,
+  QueryDocumentSnapshot,
+} from 'firebase-admin/firestore';
+import DatabaseResult from '../utils/DatabaseResult';
 
 class FirebaseRepositoryBase {
-
   /**
    * Document limit
    *
@@ -20,7 +35,7 @@ class FirebaseRepositoryBase {
    *
    * @type {WriteBatch | null}
    */
-  private __batch: WriteBatch| null;
+  private __batch: WriteBatch | null;
 
   /**
    * Inidicates if a batch write is in progress
@@ -142,8 +157,8 @@ class FirebaseRepositoryBase {
    */
   __buildCollectionQuery(
     collectionName: string,
-    sort = "timestamp",
-    order: OrderByDirection = "desc",
+    sort = 'timestamp',
+    order: OrderByDirection = 'desc',
     start: number | null = null,
   ): Query {
     if (!collectionName) {
@@ -157,7 +172,7 @@ class FirebaseRepositoryBase {
         collectionQuery = this._db
           .collection(collectionName)
           .orderBy(sort, order)
-          .offset(start??0)
+          .offset(start ?? 0)
           .limit(this._limit);
       } else {
         collectionQuery = this._db
@@ -167,7 +182,9 @@ class FirebaseRepositoryBase {
       }
       return collectionQuery;
     } catch (error) {
-      throw new Error(`Error:firebaseRepositoryBase - ${(error as Error).message}`); //... TODO - check if this is correct
+      throw new Error(
+        `Error:firebaseRepositoryBase - ${(error as Error).message}`,
+      ); //... TODO - check if this is correct
     }
   }
 
@@ -181,7 +198,9 @@ class FirebaseRepositoryBase {
    */
   __getDataFromCollection(querySnapshot: QuerySnapshot): Record<string, any>[] {
     if (!querySnapshot) {
-      throw new Error(`Error:firebaseRepositoryBase - querysnapshot is required.`);
+      throw new Error(
+        `Error:firebaseRepositoryBase - querysnapshot is required.`,
+      );
     }
     let docsArr: Record<string, any>[] = [];
     querySnapshot.docs.forEach((document: QueryDocumentSnapshot) => {
@@ -210,7 +229,10 @@ class FirebaseRepositoryBase {
         `Error:firebaseRepositoryBase - document id is required.`,
       );
     }
-    let document: DocumentSnapshot = await this._db.collection(collectionName).doc(docId).get();
+    let document: DocumentSnapshot = await this._db
+      .collection(collectionName)
+      .doc(docId)
+      .get();
     return new DatabaseResult(document.exists ? document.data() : {});
   }
 
@@ -223,7 +245,11 @@ class FirebaseRepositoryBase {
    * @returns {Promise<void>} void
    * @throws {Error} if collectionName, docId or data is not provided
    */
-  async __setDoc(collectionName: string, docId: string, data: Record<string, any>): Promise<void> {
+  async __setDoc(
+    collectionName: string,
+    docId: string,
+    data: Record<string, any>,
+  ): Promise<void> {
     if (!collectionName) {
       throw new Error(
         `Error:firebaseRepositoryBase - collection name is required.`,

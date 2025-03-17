@@ -2,13 +2,15 @@
  * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import { Firestore } from "firebase-admin/firestore";
-import { MessagesRepository } from "../interfaces/repository";
-import FirebaseRepositoryBase from "./firebase_repository_base";
-import { Message } from "../../Models/message";
+import { Firestore } from 'firebase-admin/firestore';
+import { MessagesRepository } from '../interfaces/repository';
+import FirebaseRepositoryBase from './firebase_repository_base';
+import { Message } from '../../Models/message';
 
-class FirebaseMessagesRepository extends FirebaseRepositoryBase implements MessagesRepository {
-
+class FirebaseMessagesRepository
+  extends FirebaseRepositoryBase
+  implements MessagesRepository
+{
   constructor(db: Firestore) {
     super(db);
   }
@@ -21,11 +23,14 @@ class FirebaseMessagesRepository extends FirebaseRepositoryBase implements Messa
    * @param {number|null} start - starting point
    * @returns {Promise <array>}
    */
-  async getMessages(conversationId: string, start: number | null = null): Promise <Record<string, any>[]> {
+  async getMessages(
+    conversationId: string,
+    start: number | null = null,
+  ): Promise<Record<string, any>[]> {
     let collectionQuery = this.__buildCollectionQuery(
       conversationId,
-      "timestamp",
-      "desc",
+      'timestamp',
+      'desc',
       start,
     );
     let conversations = await collectionQuery.get();
@@ -54,10 +59,14 @@ class FirebaseMessagesRepository extends FirebaseRepositoryBase implements Messa
    * @param {Function} callback callback function that should be invoked whenever the document change
    * @returns {void} void
    */
-  listenToMessages(conversationsId: string, callback: Function, errorCallback: Function): void {
+  listenToMessages(
+    conversationsId: string,
+    callback: Function,
+    errorCallback: Function,
+  ): void {
     let collectionQuery = this._db
       .collection(conversationsId)
-      .orderBy("timestamp", "desc")
+      .orderBy('timestamp', 'desc')
       .limit(this._limit);
     this.__listeners[conversationsId] = collectionQuery.onSnapshot(
       (snapshot) => {

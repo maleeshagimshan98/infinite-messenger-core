@@ -2,24 +2,26 @@
  * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import { Firestore } from "firebase-admin/firestore"
-import DatabaseResult from "../utils/DatabaseResult"
-import { UsersRepositroy } from "../interfaces/repository"
-import FirebaseRepositoryBase from "./firebase_repository_base"
-import {User} from "../../Models/user"
+import { Firestore } from 'firebase-admin/firestore';
+import DatabaseResult from '../utils/DatabaseResult';
+import { UsersRepositroy } from '../interfaces/repository';
+import FirebaseRepositoryBase from './firebase_repository_base';
+import { User } from '../../Models/user';
 
-class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRepositroy {
-
+class FirebaseUsersRepository
+  extends FirebaseRepositoryBase
+  implements UsersRepositroy
+{
   /**
    * user collection name
-   * 
+   *
    * @type {string}
    */
-  __userCollectionName: string
+  __userCollectionName: string;
 
   constructor(db: Firestore) {
-    super(db)
-    this.__userCollectionName = "users"
+    super(db);
+    this.__userCollectionName = 'users';
   }
 
   /**
@@ -29,10 +31,15 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
    * @param {number|null} start starting point
    * @returns {Promise<Record<string, any>[]>} users
    */
-  async getUsers(start: number|null = null): Promise<Record<string, any>[]> {
-    let collectionQuery = this.__buildCollectionQuery(this.__userCollectionName, "id", "asc", start)
-    let users = await collectionQuery.get()
-    return this.__getDataFromCollection(users)
+  async getUsers(start: number | null = null): Promise<Record<string, any>[]> {
+    let collectionQuery = this.__buildCollectionQuery(
+      this.__userCollectionName,
+      'id',
+      'asc',
+      start,
+    );
+    let users = await collectionQuery.get();
+    return this.__getDataFromCollection(users);
   }
 
   /**
@@ -43,11 +50,14 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
    * @returns {Promise<void>} void
    */
   async setUsers(users: User[]): Promise<void> {
-    let batch = this.batch()
+    let batch = this.batch();
     users.forEach((user) => {
-      batch.set(this._db.collection(this.__userCollectionName).doc(user.getId()),user.toObj())
-    })
-    await batch.commit()
+      batch.set(
+        this._db.collection(this.__userCollectionName).doc(user.getId()),
+        user.toObj(),
+      );
+    });
+    await batch.commit();
   }
 
   /**
@@ -58,11 +68,13 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
    * @throws {Error}
    */
   async getUser(userId: string): Promise<Record<string, any>> {
-    let dbResult = await this.__doc(this.__userCollectionName, userId)
+    let dbResult = await this.__doc(this.__userCollectionName, userId);
     if (!dbResult.hasData()) {
-      throw new Error(`Error:FirebaseUserRepository - cannot find a user with the id ${userId}`)
+      throw new Error(
+        `Error:FirebaseUserRepository - cannot find a user with the id ${userId}`,
+      );
     }
-    return dbResult.data()
+    return dbResult.data();
   }
 
   /**
@@ -76,7 +88,7 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
     await this._db
       .collection(this.__userCollectionName)
       .doc(user.getId())
-      .set(user.toObj(), { merge: true })
+      .set(user.toObj(), { merge: true });
   }
 
   /**
@@ -90,4 +102,4 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
   }
 }
 
-export default FirebaseUsersRepository
+export default FirebaseUsersRepository;

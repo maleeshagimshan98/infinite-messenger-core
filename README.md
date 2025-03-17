@@ -1,14 +1,16 @@
 # infinite-messenger-core
+
 core library for real-time messaging apps built with firebase/MongoDB
 
 ## About
-  Building person to person messaging feature, is something which we have to consider many things ranging from db schema to proper storing/retrieval of conversation,messages. In fact it takes a considarable amount of time and effort to build/test one from scratch. I built this library as  a solution to those problems, so everyone can put their effort on implementing important business logic of their applications. This library contains all necessary functions to,
 
-  - read and write new conversations
-  - read and write new messages
-  - listening to the updates of the conversations,messages.
+Building person to person messaging feature, is something which we have to consider many things ranging from db schema to proper storing/retrieval of conversation,messages. In fact it takes a considarable amount of time and effort to build/test one from scratch. I built this library as a solution to those problems, so everyone can put their effort on implementing important business logic of their applications. This library contains all necessary functions to,
 
-  Hope this library helps you.
+- read and write new conversations
+- read and write new messages
+- listening to the updates of the conversations,messages.
+
+Hope this library helps you.
 
 ## Installation
 
@@ -19,13 +21,14 @@ Install the package with npm
 ## Getting Started
 
 #### Important
+
 I reccomend using a separate mongoDB database or firebase project for this messaging feature.
 
 To start using this library, Import the package, create a new instance of `MessengerCore` and initialize user with `initUser()`. All required methods are described below.
 
 **Example**
 
-````
+```
 const MessengerCore = require('@maleeshagimshan98/infinite-messenger-core');
 
 let firebaseConfig = { /*path/to/serviceAccountKey.json*/ };
@@ -38,32 +41,31 @@ let messenger = new MessengerCore({dbDriver : 'firebase',dbConfig : firebaseConf
 let user = await messenger.initUser(/*user id*/);
 
 
-````
-
+```
 
 ## Methods
 
 Below are a list of methods available to consume.
 
-- **`initUser(userId)`** - *retrieve user from database, **returns false if user not exist**
+- **`initUser(userId)`** - \*retrieve user from database, **returns false if user not exist**
 
-    - userId - user's id
-    - *returns* - void
+  - userId - user's id
+  - _returns_ - void
 
-- **`newUser(user)`** - *create a new user and store in the database*
-    - user - user object (refer to User section for more details)
+- **`newUser(user)`** - _create a new user and store in the database_
 
-- **`initThreads()`**  - *retrieve user's conversations from database*
+  - user - user object (refer to User section for more details)
 
-- **`listenToConversations(callback)`** - *listen to user's conversation updates. the passed callback is called whenever conversation update*
+- **`initThreads()`** - _retrieve user's conversations from database_
 
-    - callback - callback function
+- **`listenToConversations(callback)`** - _listen to user's conversation updates. the passed callback is called whenever conversation update_
 
-- **`newThread(participants,thread)`** - *start a new conversation*
+  - callback - callback function
 
-    - participants - Array of participating user data objects 
-    - thread - object containing conversation id set by you
+- **`newThread(participants,thread)`** - _start a new conversation_
 
+  - participants - Array of participating user data objects
+  - thread - object containing conversation id set by you
 
 ### User
 
@@ -71,7 +73,7 @@ This library expects the users to be stored previousely in the database (firesto
 
 The user object should be in the following format.
 
-````
+```
   let user = {
       id : '', // string
       name : '',
@@ -82,11 +84,11 @@ The user object should be in the following format.
       lastSeen : ''
   };
 
-````
+```
 
 If user does not exists in the database, create a user with `newUser()`. See example below,
 
-````
+```
 let user = await messenger.initUser(userId);
 
 if (!user) {
@@ -97,7 +99,7 @@ if (!user) {
     });
 }
 
-````
+```
 
 ### Retrieve conversations
 
@@ -108,7 +110,7 @@ Received conversations (if any) are accessible via `user.conversations()` method
 
 **example**
 
-````
+```
 let messenger = new MessengerCore({dbDriver : 'firebase',dbConfig : firebaseConfig});
 
 await messenger.initUser(userId);
@@ -131,32 +133,32 @@ let conversations = messenger.user.conversations(); //... get received conversat
 
 */
 
-````
+```
 
 ### Create new conversation
 
-call `newThread()` method as follows. This saves the conversation data for all participants. Pass participant user's data as below object. *(Don't send current user as a participant, current user is automatically set as a participant)*
+call `newThread()` method as follows. This saves the conversation data for all participants. Pass participant user's data as below object. _(Don't send current user as a participant, current user is automatically set as a participant)_
 
-````
+```
     messenger.newThread(
         [
             //... participant object
             {
                 id : "00002",
                 name : "test user 2",
-                conversationsId : "conv_00002"  
+                conversationsId : "conv_00002"
             }
         ],
         {id : '123123'} //... object with conversation id
     );
 
-````
+```
 
 ### Get messages in a conversation
 
 call listen() on **conversation object** to get new messages. Pass a callback function if you need to do something everytime new message arrive. updated messages object (with all messages) is passed to the callback as the first argument.
 
-````
+```
     let conversations = messenger.user.conversations(); //... get received conversations
 
     let chatWithFoo = conversations['foo']; //... conversation you want to listen for new messages
@@ -165,7 +167,7 @@ call listen() on **conversation object** to get new messages. Pass a callback fu
         //... do something with messages
     });
 
-````
+```
 
 ### Send messages
 
@@ -173,7 +175,7 @@ call `sendMessage()` in **conversation object** to send a message.
 
 **example**
 
-````
+```
     let conversations = messenger.user.conversations(); //... get received conversations
 
     let chatWithFoo = conversations['foo']; //... conversation you want to send message
@@ -184,8 +186,7 @@ call `sendMessage()` in **conversation object** to send a message.
             content : "test from ui - for thread 123123"
         });
 
-````
-
+```
 
 ## Contributing
 
@@ -199,8 +200,8 @@ If you have a suggestion that would make this better, please fork the repo and c
 4. Push to the Branch (git push origin feature/AmazingFeature)
 5. Open a Pull Request
 
-
 ## Licence
+
 Distributed under the MIT License
 
 ## Contact

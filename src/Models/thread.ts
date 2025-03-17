@@ -2,18 +2,18 @@
  * Copyright - 2025 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-const firebaseMessagesRepository = require("../datastore/firebase/firebase_messages_repository");
-import {Message, NewMessage} from "./message";
+const firebaseMessagesRepository = require('../datastore/firebase/firebase_messages_repository');
+import { Message, NewMessage } from './message';
 
 interface Conversation {
-  id: string,
-  time?: string,
-  participants: string[],
-  startedDate: string,
-  lastUpdatedTime: string,
-  lastMessageId?: string,
-  timestamp: number,
-  messages: Record<string, Message>
+  id: string;
+  time?: string;
+  participants: string[];
+  startedDate: string;
+  lastUpdatedTime: string;
+  lastMessageId?: string;
+  timestamp: number;
+  messages: Record<string, Message>;
 }
 
 /**
@@ -91,7 +91,15 @@ class Thread {
    * @param {} messagesRepository - datastore instance (firebaseMessagesRepository/ mongodbMessagesRepository)
    */
   constructor(
-    { id, participants, startedDate, lastUpdatedTime, lastMessageId, timestamp, messages } : Conversation,
+    {
+      id,
+      participants,
+      startedDate,
+      lastUpdatedTime,
+      lastMessageId,
+      timestamp,
+      messages,
+    }: Conversation,
     messagesRepository: typeof firebaseMessagesRepository,
   ) {
     //... TODO - check datastore type is either firebaseMessagesRepository or mongodbMessagesRepository
@@ -101,8 +109,8 @@ class Thread {
     this.__messagesRepository = messagesRepository;
     this.__isListening = false;
     if (lastMessageId) {
-      this.__setLastMessageId(lastMessageId)
-    };
+      this.__setLastMessageId(lastMessageId);
+    }
     this._id = id;
     this._participants = participants ?? [];
     this._startedDate = startedDate ?? new Date().toUTCString();
@@ -138,7 +146,9 @@ class Thread {
   }
 
   getLastMessage(): Message | null {
-    return (this.__lastMessageId) ? this._messages[this.__lastMessageId]?? null : null;
+    return this.__lastMessageId
+      ? (this._messages[this.__lastMessageId] ?? null)
+      : null;
   }
 
   getMessages(): Record<string, Message> {
@@ -179,8 +189,8 @@ class Thread {
    */
   __setLastMessageId(lastMessageId: string): void {
     if (
-      typeof lastMessageId !== "string" &&
-      typeof lastMessageId !== "number"
+      typeof lastMessageId !== 'string' &&
+      typeof lastMessageId !== 'number'
     ) {
       throw new Error(
         `Error:Thread - Cannot set the lastMessageId. It must be a string or a number, but received ${typeof lastMessageId}`,
@@ -197,7 +207,7 @@ class Thread {
    * @throws {Error}
    */
   setParticipants(id: string): void {
-    if (typeof id !== "string" && typeof id !== "number") {
+    if (typeof id !== 'string' && typeof id !== 'number') {
       throw new Error(
         `Error:Thread - Cannot set the participant id. It must be a string or a number, but received ${typeof id}`,
       );
@@ -212,7 +222,7 @@ class Thread {
    * @returns {void} void
    */
   _setLastUpdatedTime(lastUpdatedTime: string): void {
-    if (typeof lastUpdatedTime !== "string") {
+    if (typeof lastUpdatedTime !== 'string') {
       throw new Error(
         `Error:Thread - Cannot set the last updated time. It must be a string or a number, but received ${typeof lastUpdatedTime}`,
       );
@@ -289,7 +299,7 @@ class Thread {
    * @throws {Error}
    */
   listen(callback: Function): void {
-    if (typeof callback !== "function") {
+    if (typeof callback !== 'function') {
       throw new Error(
         `Error:Thread - cannot listen to thread updates. Callback must be a function, but received ${typeof callback}`,
       );
@@ -343,10 +353,12 @@ class Thread {
       throw new Error(`Error:Thread -  cannot delete message.`);
     }
     //... handle errors - set status of the message
-    await this.__messagesRepository.deleteMessage(messageId).catch((error: Error) => {
-      //... handle errors
-    });
-    delete this._messages[messageId]
+    await this.__messagesRepository
+      .deleteMessage(messageId)
+      .catch((error: Error) => {
+        //... handle errors
+      });
+    delete this._messages[messageId];
     // this.update();
     //... TODO - update last message
   }
@@ -362,4 +374,4 @@ class Thread {
   }
 }
 
-export {Thread, Conversation};
+export { Thread, Conversation };

@@ -2,15 +2,15 @@
  * Copyright - 2025 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import {Thread, Conversation} from "./thread";
+import { Thread, Conversation } from './thread';
 
 type NewUser = {
-  id: string
-  name: string
-  profileImg: string
-  lastSeen: string
-  permissions: string[]
-  conversationsId: string
+  id: string;
+  name: string;
+  profileImg: string;
+  lastSeen: string;
+  permissions: string[];
+  conversationsId: string;
 };
 
 /**
@@ -22,68 +22,68 @@ class User {
    *
    * @type {string}
    */
-  private _id: string
+  private _id: string;
 
   /**
    * user name
    *
    * @type {string}
    */
-  private _name: string
+  private _name: string;
 
   /**
    * Indicates whether user is active or not
    *
    * @type {boolean}
    */
-  private _isActive: boolean
+  private _isActive: boolean;
 
   /**
    * User's last seen time
    *
    * @type {string}
    */
-  private _lastSeen: string
+  private _lastSeen: string;
 
   /**
    * Link to user's profile image
    *
    * @type {string}
    */
-  private _profileImg: string
+  private _profileImg: string;
 
   /**
    * User's permissions
    *
    * @type {string[]}
    */
-  private _permissions: string[]
+  private _permissions: string[];
 
   /**
    * User's unique id for his conversations
    *
    * @type {string}
    */
-  private _conversationsId: string
+  private _conversationsId: string;
 
   /**
    * Last conversation id of the user
    *
    * @type {string | null}
    */
-  private __lastConversationId: string | null
+  private __lastConversationId: string | null;
 
   /**
    * User's conversations
    *
    * @type {Record<string, Thread>}
    */
-  private __conversations: Record<string, Thread>
+  private __conversations: Record<string, Thread>;
 
   /**
-   * 
+   *
    */
-  private __datastore: any
+  private __datastore: any;
 
   /**
    * constructor
@@ -92,30 +92,23 @@ class User {
    * @param {Datastore} datastore - datastore object
    */
   constructor(
-    {
-      id,
-      name,
-      profileImg,
-      lastSeen,
-      permissions,
-      conversationsId,
-    }: NewUser,
-    datastore: any
+    { id, name, profileImg, lastSeen, permissions, conversationsId }: NewUser,
+    datastore: any,
   ) {
-    this.__datastore = datastore
-    this._id = id
-    this._name = name
-    this._isActive = true
-    this._lastSeen = lastSeen ?? ""
-    this._profileImg = profileImg ?? ""
-    this._permissions = permissions ?? []
-    this._conversationsId = conversationsId ?? "conv_" + this._id
+    this.__datastore = datastore;
+    this._id = id;
+    this._name = name;
+    this._isActive = true;
+    this._lastSeen = lastSeen ?? '';
+    this._profileImg = profileImg ?? '';
+    this._permissions = permissions ?? [];
+    this._conversationsId = conversationsId ?? 'conv_' + this._id;
     /** conversation id of last received conversation */
-    this.__lastConversationId = null
-    this.__conversations = {}
+    this.__lastConversationId = null;
+    this.__conversations = {};
 
     /** async calls */
-    this.setLastSeen(lastSeen ?? Date.now().toString())
+    this.setLastSeen(lastSeen ?? Date.now().toString());
   }
 
   /**
@@ -125,39 +118,39 @@ class User {
    */
 
   getId(): string {
-    return this._id
+    return this._id;
   }
 
   getName(): string {
-    return this._name
+    return this._name;
   }
 
   getProfileImg(): string {
-    return this._profileImg
+    return this._profileImg;
   }
 
   getIsActive(): boolean {
-    return this._isActive
+    return this._isActive;
   }
 
   getLastSeen(): string {
-    return this._lastSeen
+    return this._lastSeen;
   }
 
   getConversationsId(): string {
-    return this._conversationsId
+    return this._conversationsId;
   }
 
   getLastConversationId(): string | null {
-    return this.__lastConversationId
+    return this.__lastConversationId;
   }
 
   conversations(): Record<string, Thread> {
-    return this.__conversations
+    return this.__conversations;
   }
 
   getPermissions(): string[] {
-    return this._permissions
+    return this._permissions;
   }
 
   /** ============================== */
@@ -194,7 +187,7 @@ class User {
    */
   setProfileImg(url: string): void {
     //... TODO - update the database too
-    this._profileImg = url //... TODO - sanitize the input
+    this._profileImg = url; //... TODO - sanitize the input
   }
 
   /**
@@ -206,12 +199,12 @@ class User {
    */
   async setIsActive(status: boolean): Promise<void> {
     //... TODO - check - update the database too
-    if (typeof status !== "boolean") {
+    if (typeof status !== 'boolean') {
       throw new Error(
-        `Error:User - cannot set the isActive status. It must be a boolean but received ${status}`
-      )
+        `Error:User - cannot set the isActive status. It must be a boolean but received ${status}`,
+      );
     }
-    this._isActive = status
+    this._isActive = status;
   }
 
   /**
@@ -221,7 +214,7 @@ class User {
    * @returns {Promise<void>} void
    */
   async setLastSeen(time: string): Promise<void> {
-    this._lastSeen = time
+    this._lastSeen = time;
     // =========================
     //... update datastore too
     // ========================
@@ -234,7 +227,7 @@ class User {
    * @returns {void} void
    */
   setPermissions(permission: string): void {
-    this._permissions.push(permission)
+    this._permissions.push(permission);
   }
 
   /**
@@ -244,12 +237,12 @@ class User {
    * @returns {void}
    */
   private __setLastConversation(conversationId: string): void {
-    if (typeof conversationId !== "string") {
+    if (typeof conversationId !== 'string') {
       throw new Error(
-        `Error:User - cannot set the last conversation id. It must be a string but received ${typeof conversationId}`
-      )
+        `Error:User - cannot set the last conversation id. It must be a string but received ${typeof conversationId}`,
+      );
     }
-    this.__lastConversationId = conversationId
+    this.__lastConversationId = conversationId;
     // =========================
     //... update datastore too
     // =========================
@@ -262,7 +255,7 @@ class User {
    * @return {void} void
    */
   _updateConversation(conversation: Thread): void {
-    this.__conversations[conversation.getId()] = conversation
+    this.__conversations[conversation.getId()] = conversation;
   }
 
   /**
@@ -272,15 +265,15 @@ class User {
    * @param {Thread | Conversation} conversation conversations
    * @returns {Conversation} thread - inserted thread object
    */
-  __setConversations(conversation: Thread| Conversation): Thread {
-    if ((conversation instanceof Thread)) {
-      this._updateConversation(conversation)
-      return conversation
+  __setConversations(conversation: Thread | Conversation): Thread {
+    if (conversation instanceof Thread) {
+      this._updateConversation(conversation);
+      return conversation;
     } else {
-      let newThread = new Thread(conversation, this.__datastore.messages)
-      this.__conversations[conversation.id] = newThread
-      this.__setLastConversation(newThread.getId())
-      return newThread
+      let newThread = new Thread(conversation, this.__datastore.messages);
+      this.__conversations[conversation.id] = newThread;
+      this.__setLastConversation(newThread.getId());
+      return newThread;
     }
   }
 
@@ -294,15 +287,15 @@ class User {
       .getConversations(this._conversationsId, this.__lastConversationId)
       .catch((err: Error) => {
         //... handle error
-      })
+      });
 
     //... if no conversation is found, conversations is false.
     if (conversations) {
       conversations.forEach((conversation: Conversation) => {
-        this.__setConversations(conversation)
-      })
+        this.__setConversations(conversation);
+      });
     }
-    return this.__conversations
+    return this.__conversations;
   }
 
   /**
@@ -317,14 +310,14 @@ class User {
       this._conversationsId,
       (threads: Conversation[]) => {
         threads.forEach((thread: Conversation) => {
-          this.__setConversations(thread.data()) //... TODO - has tight coupling with firebase
-        })
-        callback(threads)
+          this.__setConversations(thread.data()); //... TODO - has tight coupling with firebase
+        });
+        callback(threads);
       },
       (error) => {
         //... handle error
-      }
-    )
+      },
+    );
   }
 
   /**
@@ -333,7 +326,7 @@ class User {
    * @returns {void} void
    */
   detachListener(): void {
-    this.__datastore.conversations.detach(this._conversationsId)
+    this.__datastore.conversations.detach(this._conversationsId);
   }
 
   /**
@@ -344,12 +337,14 @@ class User {
    * @returns {Promise<Conversation>} created conversation object
    */
   async startConversation(thread: Conversation): Promise<Thread> {
-    let conversation = this.__setConversations(thread)
+    let conversation = this.__setConversations(thread);
     //... TODO - remove the coupling to the Thread model in datastore modules, use dependency inversion
-    await this.__datastore.conversations.setConversation(conversation).catch((error: Error) => {
-      //... handle error
-    })
-    return conversation
+    await this.__datastore.conversations
+      .setConversation(conversation)
+      .catch((error: Error) => {
+        //... handle error
+      });
+    return conversation;
   }
 
   /**
@@ -360,8 +355,8 @@ class User {
   async updateUser(): Promise<void> {
     await this.__datastore.user.updateUser(this).catch((error: Error) => {
       //... handle error
-    }) //... check
+    }); //... check
   }
 }
 
-export {User, NewUser}
+export { User, NewUser };
