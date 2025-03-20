@@ -40,7 +40,7 @@ class FirebaseRepositoryBase extends Repository {
    *
    * @type {Record<string, Function>}
    */
-  protected __listeners: Record<string, Function>;
+  protected __listeners: Record<string, () => void>;
 
   constructor(db: Firestore) {
     super(db);
