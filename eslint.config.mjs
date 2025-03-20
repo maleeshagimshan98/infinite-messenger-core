@@ -40,7 +40,7 @@ export default [
           semi: true, // Require semicolons
           singleQuote: true, // Use single quotes
           trailingComma: 'all', // Use trailing commas
-          printWidth: 80, // Wrap lines at 80 characters
+          printWidth: 120, // Wrap lines at 80 characters
           tabWidth: 2, // Indent with 2 spaces
         },
       ],
