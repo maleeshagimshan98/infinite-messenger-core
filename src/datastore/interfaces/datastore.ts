@@ -2,7 +2,7 @@
  * Copyright - 2025 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import {
+import type {
   ConversationsRepository,
   MessagesRepository,
   UsersRepositroy,
@@ -52,4 +52,4 @@ interface Datastore {
   get messages(): MessagesRepository;
 }
 
-export default Datastore;
+export { Datastore };

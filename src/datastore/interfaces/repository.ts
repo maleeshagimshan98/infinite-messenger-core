@@ -2,15 +2,24 @@
  * Copyright - 2025 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import { Message } from '../../Models/message';
-import { User } from '../../Models/user';
+import type { Firestore } from 'firebase-admin/firestore';
+import type { Message } from '../../Models/message';
+import type { User } from '../../Models/user';
+import type DatabaseResult from '../utils/DatabaseResult';
+import type DatabaseResultSet from '../utils/DatabaseResultSet';
 
-interface Repository {}
+abstract class Repository {
+  protected _db: Firestore;
+
+  constructor(db: Firestore) {
+    this._db = db;
+  }
+}
 
 interface UsersRepositroy extends Repository {
-  getUsers(start: number | null): Promise<Record<string, any>[]>;
-  setUsers(users: Record<string, any>[]): Promise<void>;
-  getUser(userId: string): Promise<Record<string, any>>;
+  getUsers(start?: number): Promise<DatabaseResultSet<User[] | undefined>>;
+  setUsers(users: User[]): Promise<void>;
+  getUser(userId: string): Promise<DatabaseResult<User>>;
   setUser(user: User): Promise<void>;
 }
 
@@ -18,8 +27,8 @@ interface ConversationsRepository extends Repository {
   getConversations(
     conversationsId: string,
     start: number | null,
-  ): Promise<Record<string, any>[]>;
-  setConversation(user: User, conversation: Record<string, any>): void;
+  ): Promise<DatabaseResultSet>;
+  setConversation(user: User, conversation: Record<string, unknown>): void;
   listenToConversations(
     conversationsId: string,
     callback: Function,
@@ -31,7 +40,7 @@ interface MessagesRepository extends Repository {
   getMessages(
     conversationId: string,
     start: number | null,
-  ): Promise<Record<string, any>[]>;
+  ): Promise<DatabaseResultSet>;
   setMessage(conversationId: string, messages: Message): Promise<void>;
   listenToMessages(
     conversationId: string,
