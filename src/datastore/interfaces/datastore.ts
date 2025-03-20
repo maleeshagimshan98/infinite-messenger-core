@@ -2,11 +2,7 @@
  * Copyright - 2025 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import type {
-  ConversationsRepository,
-  MessagesRepository,
-  UsersRepositroy,
-} from './repository';
+import type { ConversationsRepository, MessagesRepository, UsersRepositroy } from './repository';
 
 interface Datastore {
   /**

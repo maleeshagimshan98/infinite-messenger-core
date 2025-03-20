@@ -7,6 +7,7 @@ import type { Message } from '../../Models/message';
 import type { User } from '../../Models/user';
 import type DatabaseResult from '../utils/DatabaseResult';
 import type DatabaseResultSet from '../utils/DatabaseResultSet';
+import type { Conversation } from '../../Models/thread';
 
 abstract class Repository {
   protected _db: Firestore;
@@ -24,34 +25,23 @@ interface UsersRepositroy extends Repository {
 }
 
 interface ConversationsRepository extends Repository {
-  getConversations(
-    conversationsId: string,
-    start: number | null,
-  ): Promise<DatabaseResultSet>;
-  setConversation(user: User, conversation: Record<string, unknown>): void;
+  getConversations(conversationsId: string, start?: number): Promise<DatabaseResultSet<Conversation[] | undefined>>;
+  setConversation(user: User, conversation: Conversation): void;
   listenToConversations(
     conversationsId: string,
-    callback: Function,
-    errorCallback: Function,
+    callback: (data: unknown) => void,
+    errorCallback: (error: Error) => void,
   ): void;
 }
 
 interface MessagesRepository extends Repository {
-  getMessages(
-    conversationId: string,
-    start: number | null,
-  ): Promise<DatabaseResultSet>;
+  getMessages(conversationId: string, start?: number): Promise<DatabaseResultSet<Message[] | undefined>>;
   setMessage(conversationId: string, messages: Message): Promise<void>;
   listenToMessages(
     conversationId: string,
-    callback: Function,
-    errorCallback: Function,
+    callback: (data: unknown) => void,
+    errorCallback: (error: Error) => void,
   ): void;
 }
 
-export {
-  Repository,
-  UsersRepositroy,
-  ConversationsRepository,
-  MessagesRepository,
-};
+export { Repository, UsersRepositroy, ConversationsRepository, MessagesRepository };
