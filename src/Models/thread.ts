@@ -5,7 +5,7 @@
 const firebaseMessagesRepository = require('../datastore/firebase/firebase_messages_repository');
 import { Message, NewMessage } from './message';
 
-interface Conversation {
+interface NewConversation {
   id: string;
   time?: string;
   participants: string[];
@@ -20,7 +20,7 @@ interface Conversation {
  * This class represents a thread - conversation of a user.
  * Handles the message retrieval, sending
  */
-class Thread {
+class Conversation {
   /**
    * Repository for the thread's messages
    *
@@ -91,15 +91,7 @@ class Thread {
    * @param {} messagesRepository - datastore instance (firebaseMessagesRepository/ mongodbMessagesRepository)
    */
   constructor(
-    {
-      id,
-      participants,
-      startedDate,
-      lastUpdatedTime,
-      lastMessageId,
-      timestamp,
-      messages,
-    }: Conversation,
+    { id, participants, startedDate, lastUpdatedTime, lastMessageId, timestamp, messages }: NewConversation,
     messagesRepository: typeof firebaseMessagesRepository,
   ) {
     //... TODO - check datastore type is either firebaseMessagesRepository or mongodbMessagesRepository
@@ -146,9 +138,7 @@ class Thread {
   }
 
   getLastMessage(): Message | null {
-    return this.__lastMessageId
-      ? (this._messages[this.__lastMessageId] ?? null)
-      : null;
+    return this.__lastMessageId ? (this._messages[this.__lastMessageId] ?? null) : null;
   }
 
   getMessages(): Record<string, Message> {
@@ -162,7 +152,7 @@ class Thread {
    *
    * @returns {object} a plain object
    */
-  toObj(): Record<string, any> {
+  toObj(): Record<string, unknown> {
     return {
       id: this._id,
       participants: this._participants,
@@ -188,10 +178,7 @@ class Thread {
    * @throws {Error}
    */
   __setLastMessageId(lastMessageId: string): void {
-    if (
-      typeof lastMessageId !== 'string' &&
-      typeof lastMessageId !== 'number'
-    ) {
+    if (typeof lastMessageId !== 'string' && typeof lastMessageId !== 'number') {
       throw new Error(
         `Error:Thread - Cannot set the lastMessageId. It must be a string or a number, but received ${typeof lastMessageId}`,
       );
@@ -282,7 +269,7 @@ class Thread {
       this._messages[message.getId()] = message;
       return message;
     } else {
-      let _message = new Message(message);
+      const _message = new Message(message);
       this._messages[_message.getId()] = _message;
       this.__setLastMessageId(_message.getId());
       return _message;
@@ -298,7 +285,7 @@ class Thread {
    * @returns {void} void
    * @throws {Error}
    */
-  listen(callback: Function): void {
+  listen(callback: (data: Record<string, unknown>) => void): void {
     if (typeof callback !== 'function') {
       throw new Error(
         `Error:Thread - cannot listen to thread updates. Callback must be a function, but received ${typeof callback}`,
@@ -331,13 +318,11 @@ class Thread {
    * @returns {Promise<void>} void
    */
   async sendMessage(message: Message): Promise<void> {
-    let messageObj = this.__setMessages(message);
+    const messageObj = this.__setMessages(message);
     //... handle errors - set status of the message instance to pending/failed
-    await this.__messagesRepository
-      .setMessage(this._id, messageObj)
-      .catch((error: Error) => {
-        //... handle errors
-      });
+    await this.__messagesRepository.setMessage(this._id, messageObj).catch((error: Error) => {
+      //... handle errors
+    });
     // this.update();
   }
 
@@ -353,11 +338,9 @@ class Thread {
       throw new Error(`Error:Thread -  cannot delete message.`);
     }
     //... handle errors - set status of the message
-    await this.__messagesRepository
-      .deleteMessage(messageId)
-      .catch((error: Error) => {
-        //... handle errors
-      });
+    await this.__messagesRepository.deleteMessage(messageId).catch((error: Error) => {
+      //... handle errors
+    });
     delete this._messages[messageId];
     // this.update();
     //... TODO - update last message
@@ -374,4 +357,4 @@ class Thread {
   }
 }
 
-export { Thread, Conversation };
+export { Conversation, NewConversation };
