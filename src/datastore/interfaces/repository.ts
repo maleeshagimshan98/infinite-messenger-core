@@ -25,11 +25,11 @@ interface UsersRepositroy extends Repository {
 }
 
 interface ConversationsRepository extends Repository {
-  getConversations(conversationsId: string, start?: number): Promise<DatabaseResultSet<Conversation[] | undefined>>;
-  setConversation(user: User, conversation: Conversation): void;
+  getConversations(conversationsId: string, start?: string): Promise<DatabaseResultSet<Conversation[] | undefined>>;
+  addConversation(conversationsId: string, conversation: Conversation): Promise<void>;
   listenToConversations(
     conversationsId: string,
-    callback: (data: unknown) => void,
+    callback: (data: DatabaseResultSet<Conversation[]>) => void,
     errorCallback: (error: Error) => void,
   ): void;
 }

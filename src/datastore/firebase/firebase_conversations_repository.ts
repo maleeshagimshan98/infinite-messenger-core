@@ -2,10 +2,9 @@
  * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import type { Firestore, QueryDocumentSnapshot, QuerySnapshot } from 'firebase-admin/firestore';
+import type { Firestore, QuerySnapshot } from 'firebase-admin/firestore';
 import type { ConversationsRepository } from '../interfaces/repository';
 import firebaseRepositoryBase from './firebase_repository_base';
-import type { User } from '../../Models/user';
 import { Conversation } from '../../Models/thread';
 import type { NewConversation } from '../../Models/thread';
 import DatabaseResultSet from '../utils/DatabaseResultSet';
@@ -25,12 +24,12 @@ class FirebaseConversationsRepository extends firebaseRepositoryBase implements 
    * get results from given point if start is provided
    *
    * @param {string} conversationsId conversation id
-   * @param {number|undefined} start starting document id
+   * @param {string|undefined} start starting document id
    * @returns {Promise <DatabaseResultSet<Conversation[] | undefined>>} conversations
    */
   async getConversations(
     conversationsId: string,
-    start?: number,
+    start?: string,
   ): Promise<DatabaseResultSet<Conversation[] | undefined>> {
     const collectionQuery = this._db
       .collection(conversationsId)
@@ -55,12 +54,12 @@ class FirebaseConversationsRepository extends firebaseRepositoryBase implements 
    *
    * **method expects a batch operation initiated before invoking this method**
    *
-   * @param {User} user user object
+   * @param {string} conversationsId user object
    * @param {Conversation} conversation conversation object
-   * @returns {void} void
+   * @returns {Promise<void>} void
    */
-  setConversation(user: User, conversation: Conversation): void {
-    this.batch().set(this._db.collection(user.getConversationsId()).doc(conversation.getId()), conversation.toObj(), {
+  async addConversation(conversationsId: string, conversation: Conversation): Promise<void> {
+    this.batch().set(this._db.collection(conversationsId).doc(conversation.getId()), conversation.toObj(), {
       merge: true,
     });
   }
@@ -69,19 +68,26 @@ class FirebaseConversationsRepository extends firebaseRepositoryBase implements 
    * listen to changes (new addition, deletion) in the user's conversations (latest 25)
    *
    * @param {string} conversationsId user's conversations id
-   * @param {(data: QueryDocumentSnapshot[] | false) => void} callback callback function, that should be invoked  whenever the collection change
+   * @param {(data: DatabaseResultSet<Conversation[]>) => void} callback callback function, that should be invoked  whenever the collection change
    * @param {(error: Error) => void} errorCallback callback function, that should be invoked whenever an error occurs
    * @returns {void} void
    */
   listenToConversations(
     conversationsId: string,
-    callback: (data: QueryDocumentSnapshot[] | false) => void,
+    callback: (data: DatabaseResultSet<Conversation[]>) => void,
     errorCallback: (error: Error) => void,
   ): void {
+    //... default threads limit 25 used
     const collectionQuery = this._db.collection(conversationsId).orderBy('timestamp', 'desc').limit(this._limit);
     this.__listeners[conversationsId] = collectionQuery.onSnapshot(
       (snapshot: QuerySnapshot) => {
-        callback(snapshot.empty ? false : snapshot.docs);
+        const conversations = new DatabaseResultSet<Conversation[]>(
+          this.__createModelFromCollection(
+            (data: unknown) => new Conversation(data as NewConversation, this._db),
+            this.__getDataFromCollection(snapshot),
+          ),
+        );
+        callback(conversations);
       },
       (error: Error) => {
         errorCallback(error);
