@@ -162,6 +162,15 @@ class ConversationService {
   }
 
   /**
+   * delete a convesation
+   *
+   * @param {Conversation} conversation conversation to be deleted
+   */
+  deleteConversation(conversation: Conversation): void {
+    this.__datastore.conversations.deleteConversation(this._conversationsId, conversation.getId());
+  }
+
+  /**
    * stop listening to a conversation
    *
    * @param {Conversation} conversation conversation id
