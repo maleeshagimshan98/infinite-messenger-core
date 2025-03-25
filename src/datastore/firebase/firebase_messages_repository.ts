@@ -52,7 +52,7 @@ class FirebaseMessagesRepository extends FirebaseRepositoryBase implements Messa
    * listen to new messages (latest 25)
    *
    * @param {string} conversationId conversation's id
-   * @param {(data: unknown) => void} callback callback function that should be invoked whenever the document change
+   * @param {(data: DatabaseResultSet<Message[]>) => void} callback callback function that should be invoked whenever the document change
    * @param {(error: Error) => void} errorCallback callback function that should be invoked whenever an error occurs
    * @returns {void} void
    */
@@ -78,8 +78,9 @@ class FirebaseMessagesRepository extends FirebaseRepositoryBase implements Messa
     );
   }
 
-  async deleteMessage(messageId: string): Promise<void> {
+  async deleteMessage(conversationId: string, messageId: string): Promise<void> {
     //... delete messages
+    await this._db.collection(conversationId).doc(messageId).delete();
   }
 }
 
