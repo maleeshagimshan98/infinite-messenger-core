@@ -25,12 +25,9 @@ class FirebaseConversationsRepository extends firebaseRepositoryBase implements 
    *
    * @param {string} conversationsId conversation id
    * @param {string|undefined} start starting document id
-   * @returns {Promise <DatabaseResultSet<Conversation[] | undefined>>} conversations
+   * @returns {Promise <DatabaseResultSet<Conversation[]>>} conversations
    */
-  async getConversations(
-    conversationsId: string,
-    start?: string,
-  ): Promise<DatabaseResultSet<Conversation[] | undefined>> {
+  async getConversations(conversationsId: string, start?: string): Promise<DatabaseResultSet<Conversation[]>> {
     const collectionQuery = this._db
       .collection(conversationsId)
       .orderBy(conversationsId, 'desc')
@@ -38,7 +35,7 @@ class FirebaseConversationsRepository extends firebaseRepositoryBase implements 
       .limit(this._limit);
     const conversationsSnapshot = await collectionQuery.get();
     if (conversationsSnapshot.empty) {
-      return new DatabaseResultSet();
+      return new DatabaseResultSet<Conversation[]>();
     }
     return new DatabaseResultSet<Conversation[]>(
       this.__createModelFromCollection(
@@ -67,19 +64,19 @@ class FirebaseConversationsRepository extends firebaseRepositoryBase implements 
   /**
    * listen to changes (new addition, deletion) in the user's conversations (latest 25)
    *
-   * @param {string} conversationsId user's conversations id
+   * @param {string} conversationId user's conversations id
    * @param {(data: DatabaseResultSet<Conversation[]>) => void} callback callback function, that should be invoked  whenever the collection change
    * @param {(error: Error) => void} errorCallback callback function, that should be invoked whenever an error occurs
    * @returns {void} void
    */
   listenToConversations(
-    conversationsId: string,
+    conversationId: string,
     callback: (data: DatabaseResultSet<Conversation[]>) => void,
     errorCallback: (error: Error) => void,
   ): void {
     //... default threads limit 25 used
-    const collectionQuery = this._db.collection(conversationsId).orderBy('timestamp', 'desc').limit(this._limit);
-    this.__listeners[conversationsId] = collectionQuery.onSnapshot(
+    const collectionQuery = this._db.collection(conversationId).orderBy('timestamp', 'desc').limit(this._limit);
+    this.__listeners[conversationId] = collectionQuery.onSnapshot(
       (snapshot: QuerySnapshot) => {
         const conversations = new DatabaseResultSet<Conversation[]>(
           this.__createModelFromCollection(
