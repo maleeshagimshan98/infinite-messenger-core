@@ -3,20 +3,11 @@
  */
 
 import type { Datastore } from '../datastore/interfaces/datastore';
-import { Conversation } from '../Models/thread';
-import type { User } from '../Models/user';
+import type { Conversation } from '../Models/thread';
 import type { Message } from '../Models/message';
-import { MessagesRepository } from '../datastore/interfaces/repository';
-import DatabaseResultSet from '../datastore/utils/DatabaseResultSet';
+import type DatabaseResultSet from '../datastore/utils/DatabaseResultSet';
 
 class MessageService {
-  /**
-   * Indicates if this thread is listening for new messages
-   *
-   * @type {boolean}
-   */
-  private __isListening: boolean = false;
-
   /**
    * Last message id in the conversation
    *
@@ -41,35 +32,6 @@ class MessageService {
   constructor(conversationsId: string, datastore: Datastore) {
     this._conversationsId = conversationsId;
     this.__datastore = datastore;
-  }
-
-  /**
-   * add new messages to  the conversation
-   * if the message is already in ````this.messages````, updates the data.
-   * updates the last message id in ````this.__lastMessage````
-   *
-   * DOES NOT save messages in the database.
-   *
-   * @param {Message | NewMessage} message
-   * @returns {Message} message
-   * @throws {Error}
-   */
-  __setMessages(message: Message): Message;
-  __setMessages(message: Message): Message;
-  __setMessages(message: Message | Message): Message {
-    if (!(message instanceof Message) && Object.keys(message).length <= 0) {
-      throw new Error(``);
-    }
-
-    if (message instanceof Message) {
-      this._messages[message.getId()] = message;
-      return message;
-    } else {
-      const _message = new Message(message);
-      this._messages[_message.getId()] = _message;
-      this.__lastMessageId(_message.getId());
-      return _message;
-    }
   }
 
   /**
@@ -123,7 +85,6 @@ class MessageService {
       );
     }
 
-    this.__isListening = true;
     this.__datastore.messages.listenToMessages(
       conversation.getId(),
       (messages) => {
