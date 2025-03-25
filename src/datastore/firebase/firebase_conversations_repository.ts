@@ -39,7 +39,7 @@ class FirebaseConversationsRepository extends firebaseRepositoryBase implements 
     }
     return new DatabaseResultSet<Conversation[]>(
       this.__createModelFromCollection(
-        (data: unknown) => new Conversation(data as NewConversation, this._db),
+        (data: unknown) => new Conversation(data as NewConversation),
         this.__getDataFromCollection(conversationsSnapshot),
       ),
     );
@@ -80,7 +80,7 @@ class FirebaseConversationsRepository extends firebaseRepositoryBase implements 
       (snapshot: QuerySnapshot) => {
         const conversations = new DatabaseResultSet<Conversation[]>(
           this.__createModelFromCollection(
-            (data: unknown) => new Conversation(data as NewConversation, this._db),
+            (data: unknown) => new Conversation(data as NewConversation),
             this.__getDataFromCollection(snapshot),
           ),
         );
@@ -90,6 +90,17 @@ class FirebaseConversationsRepository extends firebaseRepositoryBase implements 
         errorCallback(error);
       },
     );
+  }
+
+  /**
+   * delete a convesation
+   *
+   * @param {string} userConversationId user's conversations identifier
+   * @param {string} conversationId conversation id of the particular conversation
+   * @return {Promise<void>}
+   */
+  async deleteConversation(userConversationId: string, conversationId: string): Promise<void> {
+    await this._db.collection(userConversationId).doc(conversationId).delete();
   }
 }
 
