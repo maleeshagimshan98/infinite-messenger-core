@@ -91,10 +91,7 @@ class User {
    * @param {object} user
    * @param {Datastore} datastore - datastore object
    */
-  constructor(
-    { id, name, profileImg, lastSeen, permissions, conversationsId }: NewUser,
-    datastore: any,
-  ) {
+  constructor({ id, name, profileImg, lastSeen, permissions, conversationsId }: NewUser, datastore: unknown) {
     this.__datastore = datastore;
     this._id = id;
     this._name = name;
@@ -158,9 +155,9 @@ class User {
   /**
    * convert this class to a plain object, in order to save in the database
    *
-   * @returns {Record<string, any>} a plain object
+   * @returns {Record<string, unknown>} a plain object
    */
-  toObj(): Record<string, any> {
+  toObj(): Record<string, unknown> {
     return {
       id: this._id,
       name: this._name,
@@ -200,9 +197,7 @@ class User {
   async setIsActive(status: boolean): Promise<void> {
     //... TODO - check - update the database too
     if (typeof status !== 'boolean') {
-      throw new Error(
-        `Error:User - cannot set the isActive status. It must be a boolean but received ${status}`,
-      );
+      throw new Error(`Error:User - cannot set the isActive status. It must be a boolean but received ${status}`);
     }
     this._isActive = status;
   }
@@ -231,123 +226,6 @@ class User {
   }
 
   /**
-   * set last conversation id
-   *
-   * @param {string} conversationId
-   * @returns {void}
-   */
-  private __setLastConversation(conversationId: string): void {
-    if (typeof conversationId !== 'string') {
-      throw new Error(
-        `Error:User - cannot set the last conversation id. It must be a string but received ${typeof conversationId}`,
-      );
-    }
-    this.__lastConversationId = conversationId;
-    // =========================
-    //... update datastore too
-    // =========================
-  }
-
-  /**
-   * Updates the conversation
-   *
-   * @param {Thread} conversation
-   * @return {void} void
-   */
-  _updateConversation(conversation: Thread): void {
-    this.__conversations[conversation.getId()] = conversation;
-  }
-
-  /**
-   * add conversations to conversations array
-   * if conversation already exists, update data
-   *
-   * @param {Thread | Conversation} conversation conversations
-   * @returns {Conversation} thread - inserted thread object
-   */
-  __setConversations(conversation: Thread | Conversation): Thread {
-    if (conversation instanceof Thread) {
-      this._updateConversation(conversation);
-      return conversation;
-    } else {
-      let newThread = new Thread(conversation, this.__datastore.messages);
-      this.__conversations[conversation.id] = newThread;
-      this.__setLastConversation(newThread.getId());
-      return newThread;
-    }
-  }
-
-  /**
-   * get user's conversations from database
-   *
-   * @returns {Promise<object>} user's conversations
-   */
-  async getConversations() {
-    let conversations = await this.__datastore.conversations
-      .getConversations(this._conversationsId, this.__lastConversationId)
-      .catch((err: Error) => {
-        //... handle error
-      });
-
-    //... if no conversation is found, conversations is false.
-    if (conversations) {
-      conversations.forEach((conversation: Conversation) => {
-        this.__setConversations(conversation);
-      });
-    }
-    return this.__conversations;
-  }
-
-  /**
-   * listen to user's new conversation updates
-   *
-   * @param {Function} callback pass a callback to do something whenever user's conversations update. Updated conversations are provided as first argument
-   * @returns {Promise<void>} Promise
-   */
-  async listenToConversations(callback: Function): Promise<void> {
-    //... default threads limit 25 used
-    this.__datastore.conversations.listenToConversations(
-      this._conversationsId,
-      (threads: Conversation[]) => {
-        threads.forEach((thread: Conversation) => {
-          this.__setConversations(thread.data()); //... TODO - has tight coupling with firebase
-        });
-        callback(threads);
-      },
-      (error) => {
-        //... handle error
-      },
-    );
-  }
-
-  /**
-   * stop listening to a conversation
-   *
-   * @returns {void} void
-   */
-  detachListener(): void {
-    this.__datastore.conversations.detach(this._conversationsId);
-  }
-
-  /**
-   * start a new conversation
-   * saves the new conversation in the database
-   *
-   * @param {Conversation} thread thread data
-   * @returns {Promise<Conversation>} created conversation object
-   */
-  async startConversation(thread: Conversation): Promise<Thread> {
-    let conversation = this.__setConversations(thread);
-    //... TODO - remove the coupling to the Thread model in datastore modules, use dependency inversion
-    await this.__datastore.conversations
-      .setConversation(conversation)
-      .catch((error: Error) => {
-        //... handle error
-      });
-    return conversation;
-  }
-
-  /**
    * update the user's data in datastore
    *
    * @returns {Promise<void>} Promise
@@ -355,6 +233,7 @@ class User {
   async updateUser(): Promise<void> {
     await this.__datastore.user.updateUser(this).catch((error: Error) => {
       //... handle error
+      console.log(error);
     }); //... check
   }
 }
