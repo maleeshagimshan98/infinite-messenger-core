@@ -35,19 +35,11 @@ class FirebaseRepositoryBase extends Repository {
    */
   protected __isBatchWriting: boolean;
 
-  /**
-   * Listeners for the conversations/messages
-   *
-   * @type {Record<string, Function>}
-   */
-  protected __listeners: Record<string, () => void>;
-
   constructor(db: Firestore) {
     super(db);
     this._limit = 25;
     this.__batch = null;
     this.__isBatchWriting = false;
-    this.__listeners = {};
     this._db = db;
   }
 

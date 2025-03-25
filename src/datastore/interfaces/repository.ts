@@ -12,36 +12,47 @@ import type { Conversation } from '../../Models/thread';
 abstract class Repository {
   protected _db: Firestore;
 
+  /**
+   * Listeners for the conversations/messages
+   *
+   * @type {Record<string, Function>}
+   */
+  protected __listeners: Record<string, () => void>;
+
   constructor(db: Firestore) {
     this._db = db;
+    this.__listeners = {};
   }
 }
 
 interface UsersRepositroy extends Repository {
-  getUsers(start?: number): Promise<DatabaseResultSet<User[] | undefined>>;
+  getUsers(start?: number): Promise<DatabaseResultSet<User[]>>;
   setUsers(users: User[]): Promise<void>;
   getUser(userId: string): Promise<DatabaseResult<User>>;
   setUser(user: User): Promise<void>;
 }
 
 interface ConversationsRepository extends Repository {
-  getConversations(conversationsId: string, start?: string): Promise<DatabaseResultSet<Conversation[] | undefined>>;
+  getConversations(conversationsId: string, start?: string): Promise<DatabaseResultSet<Conversation[]>>;
   addConversation(conversationsId: string, conversation: Conversation): Promise<void>;
   listenToConversations(
     conversationsId: string,
     callback: (data: DatabaseResultSet<Conversation[]>) => void,
     errorCallback: (error: Error) => void,
   ): void;
+  detach(conversationId: string): void;
 }
 
 interface MessagesRepository extends Repository {
-  getMessages(conversationId: string, start?: number): Promise<DatabaseResultSet<Message[] | undefined>>;
+  getMessages(conversationId: string, start?: number): Promise<DatabaseResultSet<Message[]>>;
   setMessage(conversationId: string, messages: Message): Promise<void>;
   listenToMessages(
     conversationId: string,
-    callback: (data: unknown) => void,
+    callback: (data: DatabaseResultSet<Message[]>) => void,
     errorCallback: (error: Error) => void,
   ): void;
+  deleteMessage(messageId: string): Promise<void>;
+  detach(listner: string): void;
 }
 
 export { Repository, UsersRepositroy, ConversationsRepository, MessagesRepository };
