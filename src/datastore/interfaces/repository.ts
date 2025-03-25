@@ -40,6 +40,7 @@ interface ConversationsRepository extends Repository {
     callback: (data: DatabaseResultSet<Conversation[]>) => void,
     errorCallback: (error: Error) => void,
   ): void;
+  deleteConversation: (userConversationId: string, conversationId: string) => Promise<void>;
   detach(conversationId: string): void;
 }
 
@@ -51,7 +52,7 @@ interface MessagesRepository extends Repository {
     callback: (data: DatabaseResultSet<Message[]>) => void,
     errorCallback: (error: Error) => void,
   ): void;
-  deleteMessage(messageId: string): Promise<void>;
+  deleteMessage(conversationId: string, messageId: string): Promise<void>;
   detach(listner: string): void;
 }
 
