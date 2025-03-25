@@ -55,17 +55,17 @@ class MessageService {
    * send messages
    * SAVES messages in the database,updates the conversation's last updated time
    *
-   * @param {string} conversationId
+   * @param {Conversation} conversation
    * @param {Message} message
    * @returns {Promise<void>} void
    */
-  async sendMessage(conversationId: string, message: Message): Promise<void> {
-    const messageObj = this.__setMessages(message);
+  async sendMessage(conversation: Conversation, message: Message): Promise<void> {
     //... handle errors - set status of the message instance to pending/failed
-    await this.__datastore.messages.setMessage(conversationId, messageObj).catch((error: Error) => {
+    await this.__datastore.messages.setMessage(conversation.getId(), message).catch((error: Error) => {
       //... handle errors
       console.log(error);
     });
+    conversation.setMessage(message);
   }
 
   /**
@@ -115,7 +115,7 @@ class MessageService {
       throw new Error(`Error:Conversation - cannot delete message. Message not found`);
     }
     //... handle errors - set status of the message
-    await this.__datastore.messages.deleteMessage(messageId).catch((error: Error) => {
+    await this.__datastore.messages.deleteMessage(conversation.getId(), messageId).catch((error: Error) => {
       //... handle errors
       console.log(error);
     });
