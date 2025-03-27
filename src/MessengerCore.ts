@@ -127,7 +127,7 @@ class MessengerCore {
     }
     this.__user = user;
     await this.__user.setIsActive(true);
-    await this.__user.updateUser();
+    await this.updateUser(user);
     this._conversationService = new ConversationService(this.__user.getConversationsId(), this.__datastore);
     this._messageService = new MessageService(this.__user.getConversationsId(), this.__datastore);
   }
@@ -143,13 +143,25 @@ class MessengerCore {
   }
 
   /**
+   * update the user's data in datastore
+   *
+   * @returns {Promise<void>} Promise
+   */
+  async updateUser(user: User): Promise<void> {
+    await this.__datastore.user.updateUser(user).catch((error: Error) => {
+      //... handle error
+      console.log(error);
+    }); //... check
+  }
+
+  /**
    * create and save new user in the datastore
    *
    * @param {NewUser} user
    * @returns {Promise<User>}
    */
   async newUser(userObj: NewUser): Promise<User> {
-    const user = new User(userObj, this.__datastore);
+    const user = new User(userObj);
     await this.__datastore.user.setUser(user);
     return user;
   }
