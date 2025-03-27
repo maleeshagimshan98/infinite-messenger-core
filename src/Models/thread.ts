@@ -218,6 +218,7 @@ class Conversation {
   setMessage(messages: Message): void {
     this._messages[messages.getId()] = messages;
     this.__setLastMessageId(messages.getId());
+    this._setLastUpdatedTime(new Date().toUTCString());
   }
 
   /**
@@ -234,6 +235,7 @@ class Conversation {
     if (lastMessage) {
       this.__setLastMessageId(lastMessage.getId());
     }
+    this._setLastUpdatedTime(new Date().toUTCString());
   }
 
   /**
