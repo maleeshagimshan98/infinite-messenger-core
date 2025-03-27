@@ -175,10 +175,8 @@ class Conversation {
    * @throws {Error}
    */
   setParticipants(id: string): void {
-    if (typeof id !== 'string' && typeof id !== 'number') {
-      throw new Error(
-        `Error:Thread - Cannot set the participant id. It must be a string or a number, but received ${typeof id}`,
-      );
+    if (typeof id !== 'string') {
+      throw new Error(`Error:Thread - Cannot set the participant id. It must be a string, but received ${typeof id}`);
     }
     this._participants.push(id);
   }
