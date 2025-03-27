@@ -30,6 +30,7 @@ interface UsersRepositroy extends Repository {
   setUsers(users: User[]): Promise<void>;
   getUser(userId: string): Promise<DatabaseResult<User>>;
   setUser(user: User): Promise<void>;
+  updateUser(user: User): Promise<void>;
 }
 
 interface ConversationsRepository extends Repository {

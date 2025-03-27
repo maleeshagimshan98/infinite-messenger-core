@@ -38,7 +38,7 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
     }
     return new DatabaseResultSet<User[]>(
       this.__createModelFromCollection(
-        (data) => new User(data as NewUser, this._db),
+        (data) => new User(data as NewUser),
         this.__getDataFromCollection(usersSnapshot),
       ),
     );
@@ -71,7 +71,7 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
     if (!dbResult.exists) {
       return new DatabaseResult<User>();
     }
-    return new DatabaseResult(new User(dbResult.data() as NewUser, this._db));
+    return new DatabaseResult(new User(dbResult.data() as NewUser));
   }
 
   /**
