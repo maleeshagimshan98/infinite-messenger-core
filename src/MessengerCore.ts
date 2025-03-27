@@ -9,6 +9,7 @@ import { User } from './Models/user';
 import type { Datastore } from './datastore/interfaces/datastore';
 import type DatabaseResult from './datastore/utils/DatabaseResult';
 import { ConversationService } from './Service/ConversationService';
+import { MessageService } from './Service/MessageService';
 
 type MessengerOptions = {
   dbDriver: string;
@@ -40,7 +41,14 @@ class MessengerCore {
    *
    * @type {ConversationService}
    */
-  private _conversationService: ConversationService;
+  private _conversationService!: ConversationService;
+
+  /**
+   * Message service
+   *
+   * @type {MessageService}
+   */
+  private _messageService!: MessageService;
 
   /**
    * constructor
@@ -49,7 +57,6 @@ class MessengerCore {
    */
   constructor({ dbDriver, dbConfig }: MessengerOptions) {
     this.__datastore = this.__initDataStore(dbDriver, dbConfig);
-    this._conversationService = new ConversationService(this.__user.getConversationsId(), this.__datastore);
   }
 
   /**
@@ -59,6 +66,15 @@ class MessengerCore {
    */
   public conversationService(): ConversationService {
     return this._conversationService;
+  }
+
+  /**
+   * get the message service
+   *
+   * @returns {MessageService}
+   */
+  public messageService(): MessageService {
+    return this._messageService;
   }
 
   /**
@@ -102,9 +118,9 @@ class MessengerCore {
    * initialise the user
    *
    * @param {string} userId user's id
-   * @returns {Promise<User>} user object or false in failure
+   * @returns {Promise<void>} user object or false in failure
    */
-  async initUser(userId: string): Promise<User> {
+  async initialize(userId: string): Promise<void> {
     const user = await this.__getUser(userId);
     if (user === undefined) {
       throw new Error('MessengerCore:Error: User not found');
@@ -112,7 +128,8 @@ class MessengerCore {
     this.__user = user;
     await this.__user.setIsActive(true);
     await this.__user.updateUser();
-    return user;
+    this._conversationService = new ConversationService(this.__user.getConversationsId(), this.__datastore);
+    this._messageService = new MessageService(this.__user.getConversationsId(), this.__datastore);
   }
 
   /**
