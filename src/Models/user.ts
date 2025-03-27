@@ -2,7 +2,7 @@
  * Copyright - 2025 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import { Thread, Conversation } from './thread';
+import type { Conversation } from './thread';
 
 type NewUser = {
   id: string;
@@ -76,14 +76,9 @@ class User {
   /**
    * User's conversations
    *
-   * @type {Record<string, Thread>}
+   * @type {Record<string, Conversation>}
    */
-  private __conversations: Record<string, Thread>;
-
-  /**
-   *
-   */
-  private __datastore: any;
+  private __conversations: Record<string, Conversation>;
 
   /**
    * constructor
@@ -91,8 +86,7 @@ class User {
    * @param {object} user
    * @param {Datastore} datastore - datastore object
    */
-  constructor({ id, name, profileImg, lastSeen, permissions, conversationsId }: NewUser, datastore: unknown) {
-    this.__datastore = datastore;
+  constructor({ id, name, profileImg, lastSeen, permissions, conversationsId }: NewUser) {
     this._id = id;
     this._name = name;
     this._isActive = true;
@@ -142,7 +136,7 @@ class User {
     return this.__lastConversationId;
   }
 
-  conversations(): Record<string, Thread> {
+  conversations(): Record<string, Conversation> {
     return this.__conversations;
   }
 
@@ -223,18 +217,6 @@ class User {
    */
   setPermissions(permission: string): void {
     this._permissions.push(permission);
-  }
-
-  /**
-   * update the user's data in datastore
-   *
-   * @returns {Promise<void>} Promise
-   */
-  async updateUser(): Promise<void> {
-    await this.__datastore.user.updateUser(this).catch((error: Error) => {
-      //... handle error
-      console.log(error);
-    }); //... check
   }
 }
 
