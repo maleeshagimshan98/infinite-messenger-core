@@ -24,15 +24,11 @@ class FirebaseConversationsRepository extends firebaseRepositoryBase implements 
    * get results from given point if start is provided
    *
    * @param {string} conversationsId conversation id
-   * @param {string|undefined} start starting document id
+   * @param {number|undefined} start starting document id
    * @returns {Promise <DatabaseResultSet<Conversation[]>>} conversations
    */
-  async getConversations(conversationsId: string, start?: string): Promise<DatabaseResultSet<Conversation[]>> {
-    const collectionQuery = this._db
-      .collection(conversationsId)
-      .orderBy(conversationsId, 'desc')
-      .startAt(start)
-      .limit(this._limit);
+  async getConversations(conversationsId: string, start?: number): Promise<DatabaseResultSet<Conversation[]>> {
+    const collectionQuery = this.__buildCollectionQuery(conversationsId, undefined, undefined, start);
     const conversationsSnapshot = await collectionQuery.get();
     if (conversationsSnapshot.empty) {
       return new DatabaseResultSet<Conversation[]>();
@@ -49,9 +45,7 @@ class FirebaseConversationsRepository extends firebaseRepositoryBase implements 
    * add a new conversation to user's conversations
    * updates the conversation if document exists
    *
-   * **method expects a batch operation initiated before invoking this method**
-   *
-   * @param {string} conversationsId user object
+   * @param {string} conversationsId user's conversations id
    * @param {Conversation} conversation conversation object
    * @returns {Promise<void>} void
    */

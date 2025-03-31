@@ -12,7 +12,7 @@ interface NewConversation {
   lastUpdatedTime?: string;
   lastMessageId?: string;
   timestamp: number;
-  messages: Record<string, Message>;
+  messages?: Record<string, Message>;
 }
 
 /**
@@ -139,7 +139,7 @@ class Conversation {
       participants: this._participants,
       startedDate: this._startedDate,
       lastUpdatedTime: this._lastUpdatedTime,
-      lastMessageId: this.__lastMessageId,
+      lastMessageId: this.__lastMessageId ?? '',
       timestamp: this._timestamp,
       // messages: this._messages,
     };

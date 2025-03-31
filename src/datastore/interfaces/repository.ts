@@ -34,7 +34,7 @@ interface UsersRepositroy extends Repository {
 }
 
 interface ConversationsRepository extends Repository {
-  getConversations(conversationsId: string, start?: string): Promise<DatabaseResultSet<Conversation[]>>;
+  getConversations(conversationsId: string, start?: number): Promise<DatabaseResultSet<Conversation[]>>;
   addConversation(conversationsId: string, conversation: Conversation): Promise<void>;
   listenToConversations(
     conversationsId: string,
