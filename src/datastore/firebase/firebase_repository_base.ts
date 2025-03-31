@@ -75,8 +75,7 @@ class FirebaseRepositoryBase extends Repository {
    * @throws {Error} if batch write is failed
    */
   async commit(): Promise<void> {
-    if (!this.__isBatchWriting && this.__batch) {
-      this.__isBatchWriting = true;
+    if (this.__isBatchWriting && this.__batch) {
       await this.__batch.commit().catch((error) => {
         //... TODO - rollback?
         throw new Error(`Error:firebaseRepositoryBase - ${error.message}`);
