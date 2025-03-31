@@ -119,7 +119,7 @@ describe('Conversation Class', () => {
       participants: ['user-1', 'user-2'],
       startedDate: '2025-01-01T00:00:00.000Z',
       lastUpdatedTime: '2025-01-01T00:00:00.000Z',
-      lastMessageId: undefined,
+      lastMessageId: '',
       timestamp: 1743068897000,
     };
 
