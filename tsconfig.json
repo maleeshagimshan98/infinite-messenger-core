@@ -8,6 +8,7 @@
     "outDir": "dist" /* Output compiled files to 'dist' */,
     "allowJs": false /* Don't allow JavaScript files in the project */,
     "resolveJsonModule": true /* Allow importing JSON files */,
+    "declaration": true /* Generate type definitions */,
 
     /* 💡 Strict Type Checking */
     "strict": true /* Enable all strict type checking */,
@@ -33,7 +34,7 @@
     "noUncheckedIndexedAccess": true /* Ensure array/indexed types include 'undefined' */,
 
     /* 💡 Compilation Settings */
-    "noEmit": true /* Don't output compiled files (useful for linting) */
+    "noEmit": false /* Don't output compiled files (useful for linting) */
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "build"]
