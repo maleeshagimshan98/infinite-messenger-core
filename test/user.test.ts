@@ -76,19 +76,19 @@ describe('User Class', () => {
     });
 
     test('setIsActive should update the active status', async () => {
-      await user.setIsActive(false);
+      user.setIsActive(false);
       expect(user.getIsActive()).toBe(false);
     });
 
     test('setIsActive should throw an error for invalid input', async () => {
-      await expect(user.setIsActive('invalid' as unknown as boolean)).rejects.toThrow(
+      expect(() => user.setIsActive('invalid' as unknown as boolean)).toThrow(
         'Error:User - cannot set the isActive status. It must be a boolean but received invalid',
       );
     });
 
     test('setLastSeen should update the last seen time', async () => {
       const newTime = '2025-01-02T00:00:00.000Z';
-      await user.setLastSeen(newTime);
+      user.setLastSeen(newTime);
       expect(user.getLastSeen()).toBe(newTime);
     });
 
