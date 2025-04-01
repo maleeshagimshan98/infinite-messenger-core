@@ -2,30 +2,13 @@
  * Copyright - 2025 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import type { Firestore } from 'firebase-admin/firestore';
 import type { Message } from '../../Models/message';
 import type { User } from '../../Models/user';
 import type DatabaseResult from '../utils/DatabaseResult';
 import type DatabaseResultSet from '../utils/DatabaseResultSet';
 import type { Conversation } from '../../Models/thread';
 
-abstract class Repository {
-  protected _db: Firestore;
-
-  /**
-   * Listeners for the conversations/messages
-   *
-   * @type {Record<string, Function>}
-   */
-  protected __listeners: Record<string, () => void>;
-
-  constructor(db: Firestore) {
-    this._db = db;
-    this.__listeners = {};
-  }
-}
-
-interface UsersRepositroy extends Repository {
+interface UsersRepositroy {
   getUsers(start?: string): Promise<DatabaseResultSet<User[]>>;
   setUsers(users: User[]): Promise<void>;
   getUser(userId: string): Promise<DatabaseResult<User>>;
@@ -33,7 +16,7 @@ interface UsersRepositroy extends Repository {
   updateUser(user: User): Promise<void>;
 }
 
-interface ConversationsRepository extends Repository {
+interface ConversationsRepository {
   getConversations(conversationsId: string, start?: string): Promise<DatabaseResultSet<Conversation[]>>;
   addConversation(conversationsId: string, conversation: Conversation): Promise<void>;
   listenToConversations(
@@ -45,7 +28,7 @@ interface ConversationsRepository extends Repository {
   detach(conversationId: string): void;
 }
 
-interface MessagesRepository extends Repository {
+interface MessagesRepository {
   getMessages(conversationId: string, start?: string): Promise<DatabaseResultSet<Message[]>>;
   setMessage(conversationId: string, messages: Message): Promise<void>;
   listenToMessages(
@@ -57,4 +40,4 @@ interface MessagesRepository extends Repository {
   detach(listner: string): void;
 }
 
-export { Repository, UsersRepositroy, ConversationsRepository, MessagesRepository };
+export { UsersRepositroy, ConversationsRepository, MessagesRepository };

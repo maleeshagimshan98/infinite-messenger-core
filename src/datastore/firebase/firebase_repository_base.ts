@@ -11,9 +11,22 @@ import type {
   QuerySnapshot,
   QueryDocumentSnapshot,
 } from 'firebase-admin/firestore';
-import { Repository } from '../interfaces/repository';
 
-class FirebaseRepositoryBase extends Repository {
+class FirebaseRepositoryBase {
+  /**
+   * Firestore instance
+   *
+   * @type {Firestore}
+   */
+  protected _db: Firestore;
+
+  /**
+   * Listeners for the conversations/messages
+   *
+   * @type {Record<string, Function>}
+   */
+  protected __listeners: Record<string, () => void>;
+
   /**
    * Document limit
    *
@@ -36,11 +49,11 @@ class FirebaseRepositoryBase extends Repository {
   protected __isBatchWriting: boolean;
 
   constructor(db: Firestore) {
-    super(db);
+    this._db = db;
+    this.__listeners = {};
     this._limit = 25;
     this.__batch = null;
     this.__isBatchWriting = false;
-    this._db = db;
   }
 
   /**
