@@ -7,7 +7,8 @@
     "test": "jest",
     "lint": "eslint src --ext .js,.ts",
     "lint:fix": "eslint src --ext .js,.ts --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "build": "npm run format && npm run lint && tsc"
   },
   "dependencies": {
     "firebase-admin": "^10.0.1",
