@@ -7,9 +7,9 @@ import FirebaseDatastore from './datastore/firebase/firebase_repository';
 import type { NewUser } from './Models/user';
 import { User } from './Models/user';
 import type { Datastore } from './datastore/interfaces/datastore';
-import type DatabaseResult from './datastore/utils/DatabaseResult';
 import { ConversationService } from './Service/ConversationService';
 import { MessageService } from './Service/MessageService';
+import { UserService } from './Service/UserService';
 
 type MessengerOptions = {
   dbDriver: string;
@@ -51,6 +51,13 @@ class MessengerCore {
   private _messageService!: MessageService;
 
   /**
+   * User Service
+   *
+   * @type {UserService}
+   */
+  private _userService!: UserService;
+
+  /**
    * constructor
    *
    * @param {object}
@@ -75,6 +82,15 @@ class MessengerCore {
    */
   public messageService(): MessageService {
     return this._messageService;
+  }
+
+  /**
+   * get the user service
+   *
+   * @returns {UserService}
+   */
+  public userService(): UserService {
+    return this._userService;
   }
 
   /**
@@ -104,32 +120,31 @@ class MessengerCore {
   }
 
   /**
-   * get a user from the datastore
-   *
-   * @param {string} userId user's id
-   * @returns {Promise<User> | undefined}
-   */
-  private async __getUser(userId: string): Promise<User | undefined> {
-    const user: DatabaseResult<User> = await this.__datastore.user.getUser(userId);
-    return user.data();
-  }
-
-  /**
    * initialise the user
    *
    * @param {string} userId user's id
    * @returns {Promise<void>} user object or false in failure
    */
   async initialize(userId: string): Promise<void> {
-    const user = await this.__getUser(userId);
+    this._userService = new UserService(this.__datastore);
+    const user = await this._userService.getUser(userId);
     if (user === undefined) {
       throw new Error('MessengerCore:Error: User not found');
     }
     this.__user = user;
-    await this.__user.setIsActive(true);
-    await this.updateUser(user);
+    this.__user.setIsActive(true);
+    await this._userService.updateUser(user);
     this._conversationService = new ConversationService(this.__user.getConversationsId(), this.__datastore);
     this._messageService = new MessageService(this.__user.getConversationsId(), this.__datastore);
+  }
+
+  /**
+   * Get the current user
+   *
+   * @returns { User | undefined }
+   */
+  getUser(): User | undefined {
+    return this.__user;
   }
 
   /**
@@ -148,10 +163,8 @@ class MessengerCore {
    * @returns {Promise<void>} Promise
    */
   async updateUser(user: User): Promise<void> {
-    await this.__datastore.user.updateUser(user).catch((error: Error) => {
-      //... handle error
-      console.log(error);
-    }); //... check
+    await this._userService.updateUser(user);
+    this.__user = user;
   }
 
   /**
@@ -162,7 +175,7 @@ class MessengerCore {
    */
   async newUser(userObj: NewUser): Promise<User> {
     const user = new User(userObj);
-    await this.__datastore.user.setUser(user);
+    await this._userService.newUser(user);
     return user;
   }
 
@@ -176,4 +189,4 @@ class MessengerCore {
   }
 }
 
-module.exports = MessengerCore;
+export { MessengerCore };
