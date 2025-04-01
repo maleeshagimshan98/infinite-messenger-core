@@ -11,7 +11,7 @@ interface NewConversation {
   startedDate?: string;
   lastUpdatedTime?: string;
   lastMessageId?: string;
-  timestamp: number;
+  timestamp?: number;
   messages?: Record<string, Message>;
 }
 
