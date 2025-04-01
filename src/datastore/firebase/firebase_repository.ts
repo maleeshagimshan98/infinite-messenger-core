@@ -21,21 +21,21 @@ class FirebaseRepository implements Datastore {
   /**
    * User repository.
    *
-   * @type {firebaseUserRepository}
+   * @type {FirebaseUserRepository}
    */
   public __user: FirebaseUsersRepository;
 
   /**
    * Conversation repository.
    *
-   * @type {firebaseConversationRepository}
+   * @type {FirebaseConversationRepository}
    */
   public __conversations: FirebaseConversationsRepository;
 
   /**
    * Messages repository.
    *
-   * @type {firebaseMessagesRepository}
+   * @type {FirebaseMessagesRepository}
    */
   public __messages: FirebaseMessagesRepository;
 
@@ -49,15 +49,15 @@ class FirebaseRepository implements Datastore {
     this.__messages = new FirebaseMessagesRepository(this.__db);
   }
 
-  get user() {
+  get user(): FirebaseUsersRepository {
     return this.__user;
   }
 
-  get conversations() {
+  get conversations(): FirebaseConversationsRepository {
     return this.__conversations;
   }
 
-  get messages() {
+  get messages(): FirebaseMessagesRepository {
     return this.__messages;
   }
 }
