@@ -4,12 +4,12 @@
 
 import type { Firestore, QuerySnapshot } from 'firebase-admin/firestore';
 import type { ConversationsRepository } from '../interfaces/repository';
-import firebaseRepositoryBase from './firebase_repository_base';
+import FirebaseRepositoryBase from './firebase_repository_base';
 import { Conversation } from '../../Models/thread';
 import type { NewConversation } from '../../Models/thread';
 import DatabaseResultSet from '../utils/DatabaseResultSet';
 
-class FirebaseConversationsRepository extends firebaseRepositoryBase implements ConversationsRepository {
+class FirebaseConversationsRepository extends FirebaseRepositoryBase implements ConversationsRepository {
   /**
    * constructor
    *
