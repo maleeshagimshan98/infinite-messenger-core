@@ -81,9 +81,7 @@ describe('User Class', () => {
     });
 
     test('setIsActive should throw an error for invalid input', async () => {
-      await expect(
-        user.setIsActive('invalid' as unknown as boolean),
-      ).rejects.toThrow(
+      await expect(user.setIsActive('invalid' as unknown as boolean)).rejects.toThrow(
         'Error:User - cannot set the isActive status. It must be a boolean but received invalid',
       );
     });

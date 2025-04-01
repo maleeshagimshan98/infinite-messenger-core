@@ -55,7 +55,7 @@ describe('Conversation Class', () => {
 
   test('setParticipants should throw an error for invalid input', () => {
     expect(() => conversation.setParticipants(123 as unknown as string)).toThrow(
-      'Error:Thread - Cannot set the participant id. It must be a string, but received number'
+      'Error:Thread - Cannot set the participant id. It must be a string, but received number',
     );
   });
 

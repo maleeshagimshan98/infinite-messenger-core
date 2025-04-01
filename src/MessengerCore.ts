@@ -1,5 +1,5 @@
 /**
- * Copyright - 2021 - Maleesha Gimshan (github.com/maleeshagimshan98)
+ * Copyright - 2025 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
 import FirebaseRepository from './datastore/firebase/firebase_repository';

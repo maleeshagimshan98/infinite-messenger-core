@@ -15,7 +15,7 @@ describe('FirebaseUsersRepository Integration Tests', () => {
     conversationsId: 'conv_test_user_1',
   };
 
-  beforeAll(() => {    
+  beforeAll(() => {
     const app = initializeApp({
       credential: cert('./key/key.json'),
     });
@@ -35,7 +35,7 @@ describe('FirebaseUsersRepository Integration Tests', () => {
 
     const db = getFirestore();
     const doc = await db.collection('users').doc(testUserId).get();
-    
+
     expect(doc.exists).toBe(true);
     expect(doc.data()).toMatchObject(user.toObj());
   });

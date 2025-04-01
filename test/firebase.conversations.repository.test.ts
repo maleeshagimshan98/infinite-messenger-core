@@ -29,7 +29,7 @@ describe('FirebaseConversationsRepository Integration Tests', () => {
 
   test('should add a conversation to Firestore', async () => {
     const conversation = new Conversation(testConversationData);
-    await firebaseConversationsRepository.addConversation(testConversationsId, conversation);    
+    await firebaseConversationsRepository.addConversation(testConversationsId, conversation);
     await firebaseConversationsRepository.commit();
 
     const db = getFirestore();
@@ -46,7 +46,7 @@ describe('FirebaseConversationsRepository Integration Tests', () => {
   });
 
   test('should listen to new conversations in Firestore', (done) => {
-    const newConversationId = 'test_conversation_1';    
+    const newConversationId = 'test_conversation_1';
 
     firebaseConversationsRepository.listenToConversations(
       testConversationsId,

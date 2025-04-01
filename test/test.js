@@ -22,9 +22,7 @@ var test = async () => {
 
   //get conversations
   await messenger.initThreads();
-  console.log(
-    `conversations ==> ${JSON.stringify(user.conversations())} \n \n \n`,
-  );
+  console.log(`conversations ==> ${JSON.stringify(user.conversations())} \n \n \n`);
 
   /**
    * listen to conversatoins

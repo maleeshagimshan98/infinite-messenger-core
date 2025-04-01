@@ -76,4 +76,3 @@ describe('FirebaseRepository', () => {
     expect(firebaseRepository.messages).toEqual({ mockMessagesRepo: true });
   });
 });
-
