@@ -4,7 +4,7 @@
 
 import type { IDatabaseResult } from './IDatabaseResult';
 
-class DatabaseResult<T> implements IDatabaseResult<T> {
+class DatabaseResultSet<T> implements IDatabaseResult<T> {
   /**
    * Data object.
    *
@@ -31,7 +31,7 @@ class DatabaseResult<T> implements IDatabaseResult<T> {
   /**
    * Returns the _data object.
    *
-   * @returns {T} The current data.
+   * @returns {T | undefined} The current data.
    */
   data(): T | undefined {
     return this._data;
@@ -47,4 +47,4 @@ class DatabaseResult<T> implements IDatabaseResult<T> {
   }
 }
 
-export default DatabaseResult;
+export default DatabaseResultSet;
