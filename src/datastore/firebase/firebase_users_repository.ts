@@ -27,10 +27,10 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
    * get array of users from firebase collection
    * get results from given point if start is provided
    *
-   * @param {number} start starting point
+   * @param {string | undefined} start starting point
    * @returns {Promise<DatabaseResultSet<User[]>>} users
    */
-  async getUsers(start?: number): Promise<DatabaseResultSet<User[]>> {
+  async getUsers(start?: string): Promise<DatabaseResultSet<User[]>> {
     const collectionQuery = this.__buildCollectionQuery(this.__userCollectionName, 'id', 'asc', start);
     const usersSnapshot = await collectionQuery.get();
     if (usersSnapshot.empty) {
@@ -89,9 +89,9 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
    * update a user's data
    *
    * @param {User} user
-   * @returns {void} void
+   * @returns {Promise<void>} void
    */
-  async updateUser() {
+  async updateUser(): Promise<void> {
     //... TODO
   }
 }

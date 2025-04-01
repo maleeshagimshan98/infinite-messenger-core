@@ -131,7 +131,7 @@ class FirebaseRepositoryBase extends Repository {
     collectionName: string,
     sort = 'timestamp',
     order: OrderByDirection = 'desc',
-    start?: number,
+    start?: string,
   ): Query {
     if (!collectionName) {
       throw new Error(`Error:firebaseRepositoryBase - collection name is required.`);
@@ -139,11 +139,7 @@ class FirebaseRepositoryBase extends Repository {
     let collectionQuery: Query;
     try {
       if (start) {
-        collectionQuery = this._db
-          .collection(collectionName)
-          .orderBy(sort, order)
-          .offset(start ?? 0)
-          .limit(this._limit);
+        collectionQuery = this._db.collection(collectionName).orderBy(sort, order).startAfter(start).limit(this._limit);
       } else {
         collectionQuery = this._db.collection(collectionName).orderBy(sort, order).limit(this._limit);
       }

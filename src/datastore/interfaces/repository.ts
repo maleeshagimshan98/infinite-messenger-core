@@ -26,7 +26,7 @@ abstract class Repository {
 }
 
 interface UsersRepositroy extends Repository {
-  getUsers(start?: number): Promise<DatabaseResultSet<User[]>>;
+  getUsers(start?: string): Promise<DatabaseResultSet<User[]>>;
   setUsers(users: User[]): Promise<void>;
   getUser(userId: string): Promise<DatabaseResult<User>>;
   setUser(user: User): Promise<void>;
@@ -34,7 +34,7 @@ interface UsersRepositroy extends Repository {
 }
 
 interface ConversationsRepository extends Repository {
-  getConversations(conversationsId: string, start?: number): Promise<DatabaseResultSet<Conversation[]>>;
+  getConversations(conversationsId: string, start?: string): Promise<DatabaseResultSet<Conversation[]>>;
   addConversation(conversationsId: string, conversation: Conversation): Promise<void>;
   listenToConversations(
     conversationsId: string,
@@ -46,7 +46,7 @@ interface ConversationsRepository extends Repository {
 }
 
 interface MessagesRepository extends Repository {
-  getMessages(conversationId: string, start?: number): Promise<DatabaseResultSet<Message[]>>;
+  getMessages(conversationId: string, start?: string): Promise<DatabaseResultSet<Message[]>>;
   setMessage(conversationId: string, messages: Message): Promise<void>;
   listenToMessages(
     conversationId: string,

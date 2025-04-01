@@ -19,10 +19,10 @@ class FirebaseMessagesRepository extends FirebaseRepositoryBase implements Messa
    * get results from given point if start is provided
    *
    * @param {string} conversationId - conversation id
-   * @param {number | undefined} start - starting point
+   * @param {string | undefined} start - starting point
    * @returns {Promise <DatabaseResultSet<Message[]>>} messages
    */
-  async getMessages(conversationId: string, start?: number): Promise<DatabaseResultSet<Message[]>> {
+  async getMessages(conversationId: string, start?: string): Promise<DatabaseResultSet<Message[]>> {
     const collectionQuery = this.__buildCollectionQuery(conversationId, 'timestamp', 'desc', start);
     const conversationsSnapshot = await collectionQuery.get();
     if (conversationsSnapshot.empty) {
