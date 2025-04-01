@@ -2,7 +2,7 @@
  * Copyright - 2025 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import FirebaseRepository from './datastore/firebase/firebase_repository';
+import FirebaseDatastore from './datastore/firebase/firebase_repository';
 //import Mongodb from "./datastore/mongodb/mongodb";
 import type { NewUser } from './Models/user';
 import { User } from './Models/user';
@@ -88,7 +88,7 @@ class MessengerCore {
   private __initDataStore(dbDriver: string, dbConfig: string): Datastore {
     try {
       if (dbDriver == 'firebase') {
-        return new FirebaseRepository(dbConfig);
+        return new FirebaseDatastore(dbConfig);
       }
       // if (dbDriver == 'mongodb') {
       //   //this.__datastore = new MongodbRepository(dbConfig);

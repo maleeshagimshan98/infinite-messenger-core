@@ -10,7 +10,7 @@ import FirebaseUsersRepository from './firebase_users_repository';
 import FirebaseConversationsRepository from './firebase_conversations_repository';
 import FirebaseMessagesRepository from './firebase_messages_repository';
 
-class FirebaseRepository implements Datastore {
+class FirebaseDatastore implements Datastore {
   /**
    * Firestore database instance.
    *
@@ -62,4 +62,4 @@ class FirebaseRepository implements Datastore {
   }
 }
 
-export default FirebaseRepository;
+export default FirebaseDatastore;
