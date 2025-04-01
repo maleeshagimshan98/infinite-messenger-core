@@ -171,6 +171,16 @@ class User {
    */
 
   /**
+   * Set user's name
+   *
+   * @param {string} name user name
+   * @returns {void}
+   */
+  setName(name: string): void {
+    this._name = name;
+  }
+
+  /**
    * set profile image of user
    *
    * @param {string} url - url of user's profile image
@@ -186,9 +196,9 @@ class User {
    * also makes changes in remote database
    *
    * @param {boolean} status - active status of user's
-   * @returns {Promise<void>} void
+   * @returns {void} void
    */
-  async setIsActive(status: boolean): Promise<void> {
+  setIsActive(status: boolean): void {
     //... TODO - check - update the database too
     if (typeof status !== 'boolean') {
       throw new Error(`Error:User - cannot set the isActive status. It must be a boolean but received ${status}`);
@@ -200,13 +210,23 @@ class User {
    * set last seen time of user
    *
    * @param {string} time - last seen time
-   * @returns {Promise<void>} void
+   * @returns {void} void
    */
-  async setLastSeen(time: string): Promise<void> {
+  setLastSeen(time: string): void {
     this._lastSeen = time;
     // =========================
     //... update datastore too
     // ========================
+  }
+
+  /**
+   * Set the last conversation's id for the user
+   *
+   * @param lastConversationId id of the last conversation
+   * @return {void}
+   */
+  setLastCoversationId(lastConversationId: string): void {
+    this.__lastConversationId = lastConversationId;
   }
 
   /**
