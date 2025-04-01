@@ -28,7 +28,7 @@
 
     /* 💡 Linting & Formatting */
     "skipLibCheck": true /* Skip type checking for dependencies */,
-    "noUnusedLocals": true /* Warn about unused local variables */,
+    "noUnusedLocals": false /* Warn about unused local variables */,
     "noUnusedParameters": true /* Warn about unused function parameters */,
     "exactOptionalPropertyTypes": true /* Enforce strict optional properties */,
     "noUncheckedIndexedAccess": true /* Ensure array/indexed types include 'undefined' */,
