@@ -91,8 +91,18 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
    * @param {User} user
    * @returns {Promise<void>} void
    */
-  async updateUser(): Promise<void> {
-    //... TODO
+  async updateUser(user: User): Promise<void> {
+    await this._db.collection(this.__userCollectionName).doc(user.getId()).update(user.toObj());
+  }
+
+  /**
+   * delete a user
+   *
+   * @param {User} user
+   * @returns {Promise<void>}
+   */
+  async deleteUser(user: User): Promise<void> {
+    await this._db.collection(this.__userCollectionName).doc(user.getId()).delete();
   }
 }
 

@@ -14,6 +14,7 @@ interface UsersRepositroy {
   getUser(userId: string): Promise<DatabaseResult<User>>;
   setUser(user: User): Promise<void>;
   updateUser(user: User): Promise<void>;
+  deleteUser(user: User): Promise<void>;
 }
 
 interface ConversationsRepository {
