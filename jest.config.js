@@ -9,4 +9,5 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/node_modules/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/test/setup.js'],
+  maxWorkers: 1,
 };
