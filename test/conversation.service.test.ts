@@ -6,7 +6,7 @@ import FirebaseConversationsRepository from '../src/datastore/firebase/firebase_
 // import DatabaseResultSet from '../src/datastore/utils/DatabaseResultSet';
 
 describe('ConversationService', () => {
-  const datastore: FirebaseDatastore = new FirebaseDatastore('./key/key.json');;
+  const datastore: FirebaseDatastore = new FirebaseDatastore('./key/key.json');
   let conversationService: ConversationService;
   let user: User;
   let conversation: Conversation;
@@ -47,12 +47,12 @@ describe('ConversationService', () => {
       const conversations = await conversationService.getConversations();
 
       console.log(conversations[conversation.getId()]);
-      
-      // Assertions      
+
+      // Assertions
       expect(conversations).toHaveProperty(conversation.getId());
       expect(conversations[conversation.getId()]).toStrictEqual(conversation);
 
-      await conversationsRepository.deleteConversation(user.getConversationsId(),conversation.getId());
+      await conversationsRepository.deleteConversation(user.getConversationsId(), conversation.getId());
     });
 
     test('should handle empty conversations gracefully', async () => {

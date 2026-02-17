@@ -109,13 +109,13 @@ describe('MessageService', () => {
     });
 
     test('should handle empty messages gracefully', async () => {
-        // Retrieve messages when none exist
-        const messagesCollection = await messageService.getMessages(conversation);
-  
-        // Assertions
-        expect(messagesCollection.hasData()).toBe(false);
-        expect(conversation.getMessages()).toEqual({});
-      });
+      // Retrieve messages when none exist
+      const messagesCollection = await messageService.getMessages(conversation);
+
+      // Assertions
+      expect(messagesCollection.hasData()).toBe(false);
+      expect(conversation.getMessages()).toEqual({});
+    });
   });
 
   describe('detachListener', () => {

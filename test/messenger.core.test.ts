@@ -1,4 +1,4 @@
-import {MessengerCore} from '../src/MessengerCore';
+import { MessengerCore } from '../src/MessengerCore';
 import { User, NewUser } from '../src/Models/user';
 import { ConversationService } from '../src/Service/ConversationService';
 import { MessageService } from '../src/Service/MessageService';
@@ -97,7 +97,7 @@ describe('MessengerCore', () => {
       const retrievedUser = await messengerCore.userService().getUser(newUser.id);
       expect(retrievedUser?.getId()).toBe(newUser.id);
     });
-  });  
+  });
 
   describe('conversationService', () => {
     test('should return the conversation service instance', async () => {
