@@ -9,6 +9,7 @@
     "allowJs": false /* Don't allow JavaScript files in the project */,
     "resolveJsonModule": true /* Allow importing JSON files */,
     "declaration": true /* Generate type definitions */,
+    "types": ["jest", "node"],
 
     /* 💡 Strict Type Checking */
     "strict": true /* Enable all strict type checking */,
@@ -36,6 +37,6 @@
     /* 💡 Compilation Settings */
     "noEmit": false /* Don't output compiled files (useful for linting) */
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "test/**/*.ts"],
   "exclude": ["node_modules", "dist", "build"]
 }
