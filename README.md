@@ -1,209 +1,1079 @@
-# infinite-messenger-core
+# Messenger Core v2.0
 
-core library for real-time messaging apps built with firebase/MongoDB
+<p align="center">
+  <em>A powerful, real-time messaging library for Node.js applications</em>
+</p>
 
-## About
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#documentation">Documentation</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#contributing">Contributing</a>
+</p>
 
-Building person to person messaging feature, is something which we have to consider many things ranging from db schema to proper storing/retrieval of conversation,messages. In fact it takes a considarable amount of time and effort to build/test one from scratch. I built this library as a solution to those problems, so everyone can put their effort on implementing important business logic of their applications. This library contains all necessary functions to,
+---
 
-- read and write new conversations
-- read and write new messages
-- listening to the updates of the conversations,messages.
+## Introduction
 
-Hope this library helps you.
+**Messenger Core** is a production-ready, real-time messaging library built with Firebase for Node.js servers. It provides a complete abstraction layer for building chat applications with minimal boilerplate code.
+
+### Why Messenger Core?
+
+Building a messaging system from scratch is complex:
+
+- 📊 Database schema design for users, conversations, and messages
+- ⚡ Real-time synchronization across multiple clients
+- 🔄 Pagination and efficient data retrieval
+- 🏗️ Scalable architecture that supports growth
+
+**Messenger Core solves these challenges** by providing:
+
+- ✅ **Clean, layered architecture** with separation of concerns
+- ✅ **Real-time updates** out of the box via Firebase listeners
+- ✅ **Type-safe API** with full TypeScript support
+- ✅ **Database abstraction** - swap implementations without code changes
+- ✅ **Production-tested** with comprehensive test coverage
+
+### What You Can Build
+
+- 💬 One-on-one chat applications
+- 👥 Group messaging platforms
+- 📱 Mobile backend APIs
+- 🎮 In-game chat systems
+- 💼 Customer support portals
+
+---
 
 ## Installation
 
-Install the package with npm
-
-- `npm install @maleeshagimshan98/infinite-messenger-core `
-
-## Getting Started
-
-#### Important
-
-I reccomend using a separate mongoDB database or firebase project for this messaging feature.
-
-To start using this library, Import the package, create a new instance of `MessengerCore` and initialize user with `initUser()`. All required methods are described below.
-
-**Example**
-
-```
-const MessengerCore = require('@maleeshagimshan98/infinite-messenger-core');
-
-let firebaseConfig = { /*path/to/serviceAccountKey.json*/ };
-
-//... your application
-let messenger = new MessengerCore({dbDriver : 'firebase',dbConfig : firebaseConfig});
-
- //... get user object from database (firebase/mongoDB),
- //... returns false in case user does not exists.
-let user = await messenger.initUser(/*user id*/);
-
-
+```bash
+npm install @maleeshagimshan98/infinite-messenger-core
 ```
 
-## Methods
+### Prerequisites
 
-Below are a list of methods available to consume.
+- **Node.js** 14.x or higher
+- **Firebase Project** with Firestore enabled
+- **Service Account Key** (JSON file) from Firebase Console
 
-- **`initUser(userId)`** - \*retrieve user from database, **returns false if user not exist**
+---
 
-  - userId - user's id
-  - _returns_ - void
+## Quick Start
 
-- **`newUser(user)`** - _create a new user and store in the database_
+### 1. Set Up Firebase
 
-  - user - user object (refer to User section for more details)
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+2. Enable Firestore Database
+3. Generate a service account key:
+   - Go to Project Settings → Service Accounts
+   - Click "Generate New Private Key"
+   - Save the JSON file securely
 
-- **`initThreads()`** - _retrieve user's conversations from database_
+### 2. Initialize the Library
 
-- **`listenToConversations(callback)`** - _listen to user's conversation updates. the passed callback is called whenever conversation update_
+```typescript
+import { MessengerCore } from '@maleeshagimshan98/infinite-messenger-core';
+import { User, Conversation, Message } from '@maleeshagimshan98/infinite-messenger-core';
 
-  - callback - callback function
-
-- **`newThread(participants,thread)`** - _start a new conversation_
-
-  - participants - Array of participating user data objects
-  - thread - object containing conversation id set by you
-
-### User
-
-This library expects the users to be stored previousely in the database (firestore/mongoDB) for this particular library.
-
-The user object should be in the following format.
-
-```
-  let user = {
-      id : '', // string
-      name : '',
-      conversationsId : '' //... optional, if not provided, 'conv_' + id will be the default
-      profileImg : '', //... url to profile image - optional (default = ''),
-      permissions : [], //... optional (not used in the library)
-      isActive : false,
-      lastSeen : ''
-  };
-
+// Initialize with Firebase configuration
+const messenger = new MessengerCore({
+  dbDriver: 'firebase',
+  dbConfig: './path/to/firebase-key.json',
+});
 ```
 
-If user does not exists in the database, create a user with `newUser()`. See example below,
+### 3. Initialize User Session (Required)
 
-```
-let user = await messenger.initUser(userId);
+> ⚠️ **Important**: You MUST call `initialize()` before performing any operations with the library. If the user doesn't exist, an error will be thrown - you must handle this appropriately.
 
-if (!user) {
-    await messenger.newUser({
-        id : '',
-        name : '',
-        profileImg : '',
+```typescript
+try {
+  // Initialize user session - REQUIRED before any other operations
+  await messenger.initialize('user123');
+
+  // If successful, you can now use the library
+  const currentUser = messenger.getUser();
+  console.log('Active user:', currentUser.getName());
+} catch (error) {
+  if (error.message.includes('User not found')) {
+    console.log('User does not exist. Creating new user...');
+
+    // Create a new user
+    const newUser = await messenger.newUser({
+      id: 'user123',
+      name: 'John Doe',
+      profileImg: 'https://example.com/avatar.jpg',
+      lastSeen: new Date().toISOString(),
+      permissions: ['read', 'write'],
+      conversationsId: 'conv_user123', // Auto-generated if not provided
     });
+
+    console.log('User created:', newUser.getName());
+
+    // Now initialize with the newly created user
+    await messenger.initialize('user123');
+  } else {
+    console.error('Initialization failed:', error);
+    throw error;
+  }
+}
+```
+
+### 4. Alternative: Create User First (If You Know User Doesn't Exist)
+
+```typescript
+// If you're setting up a new user for the first time
+const newUser = await messenger.newUser({
+  id: 'user456',
+  name: 'Jane Smith',
+  profileImg: 'https://example.com/avatar.jpg',
+  lastSeen: new Date().toISOString(),
+  permissions: ['read', 'write'],
+  conversationsId: 'conv_user456',
+});
+
+// Then initialize the session
+await messenger.initialize('user456');
+```
+
+### 5. Send Your First Message
+
+```typescript
+// Load conversations (after successful initialization)
+await messenger.initConversations();
+
+// Start a new conversation
+const conversation = new Conversation({
+  id: 'conv_' + Date.now(),
+  participants: ['user123', 'user456'],
+});
+
+await messenger.conversationService().startConversation(messenger.getUser(), conversation);
+
+// Send a message
+const message = new Message({
+  senderId: 'user123',
+  content: 'Hello, World! 👋',
+});
+
+await messenger.messageService().sendMessage(conversation, message);
+
+console.log('Message sent successfully!');
+```
+
+---
+
+## Important: Initialization Workflow
+
+**Every session MUST follow this pattern:**
+
+1. **Create `MessengerCore` instance** with database configuration
+2. **Call `initialize(userId)`** - This is MANDATORY before any operations
+   - ✅ If user exists: Session starts successfully
+   - ❌ If user doesn't exist: Error is thrown - handle by creating the user first
+3. **Perform operations** - Only after successful initialization
+
+```typescript
+// Recommended pattern
+const messenger = new MessengerCore({ dbDriver: 'firebase', dbConfig: './key.json' });
+
+try {
+  await messenger.initialize('user123');
+  // ✅ User exists - proceed with operations
+  await messenger.initConversations();
+  // ... rest of your code
+} catch (error) {
+  if (error.message.includes('User not found')) {
+    // ❌ User doesn't exist - create first, then initialize
+    await messenger.newUser({ id: 'user123', name: 'New User' /* ... */ });
+    await messenger.initialize('user123');
+  }
+}
+```
+
+---
+
+## Features
+
+### 🔐 User Management
+
+Create, retrieve, update, and manage users with ease.
+
+#### Create a User
+
+```typescript
+const user = await messenger.newUser({
+  id: 'user789',
+  name: 'Jane Smith',
+  profileImg: 'https://example.com/jane.jpg',
+  lastSeen: new Date().toISOString(),
+  permissions: ['read', 'write', 'admin'],
+  conversationsId: 'conv_user789',
+});
+```
+
+#### Get User Information
+
+```typescript
+const userService = messenger.userService();
+const user = await userService.getUser('user789');
+
+console.log('User name:', user.getName());
+console.log('Last seen:', user.getLastSeen());
+console.log('Is active:', user.getIsActive());
+```
+
+#### Update User Profile
+
+```typescript
+const user = messenger.getUser();
+user.setName('Jane Doe');
+user.setProfileImg('https://example.com/new-avatar.jpg');
+
+await messenger.updateUser(user);
+```
+
+---
+
+### 💬 Conversation Management
+
+Manage conversations between users with real-time synchronization.
+
+#### Start a New Conversation
+
+```typescript
+const conversationService = messenger.conversationService();
+
+const conversation = new Conversation({
+  id: 'conv_' + Date.now(),
+  participants: ['user123', 'user456', 'user789'], // Supports multiple participants
+});
+
+await conversationService.startConversation(messenger.getUser(), conversation);
+```
+
+#### Retrieve User's Conversations
+
+```typescript
+// Get all conversations
+await messenger.initConversations();
+const conversations = conversationService.getConversations();
+
+// Iterate through conversations
+Object.values(conversations).forEach((conv) => {
+  console.log('Conversation ID:', conv.getId());
+  console.log('Participants:', conv.getParticipants());
+  console.log('Last updated:', conv.getLastUpdatedTime());
+});
+```
+
+#### Listen for New Conversations (Real-time)
+
+```typescript
+await conversationService.listenToConversations((conversationsData) => {
+  if (conversationsData.hasData()) {
+    const newConversations = conversationsData.data();
+
+    newConversations.forEach((conv) => {
+      console.log('New conversation:', conv.getId());
+      console.log('With:', conv.getParticipants());
+    });
+  }
+});
+```
+
+#### Delete a Conversation
+
+```typescript
+conversationService.deleteConversation(conversation);
+```
+
+#### Stop Listening
+
+```typescript
+// Clean up listeners to prevent memory leaks
+conversationService.detachListener();
+```
+
+---
+
+### 📨 Message Management
+
+Send, retrieve, and listen to messages with real-time updates.
+
+#### Send a Message
+
+```typescript
+const messageService = messenger.messageService();
+
+const message = new Message({
+  senderId: 'user123',
+  content: 'Hey! How are you doing?',
+  timestamp: Date.now(),
+});
+
+await messageService.sendMessage(conversation, message);
+```
+
+#### Retrieve Messages
+
+```typescript
+const messagesResult = await messageService.getMessages(conversation);
+
+if (messagesResult.hasData()) {
+  const messages = messagesResult.data();
+
+  messages.forEach((msg) => {
+    console.log(`${msg.getSenderId()}: ${msg.getContent()}`);
+    console.log(`Sent at: ${msg.getTime()}`);
+  });
+}
+```
+
+#### Listen for New Messages (Real-time)
+
+```typescript
+messageService.listen(conversation, (messagesData) => {
+  if (messagesData.hasData()) {
+    const newMessages = messagesData.data();
+
+    newMessages.forEach((msg) => {
+      console.log(`📩 New message from ${msg.getSenderId()}`);
+      console.log(`Content: ${msg.getContent()}`);
+    });
+  }
+});
+```
+
+#### Delete a Message
+
+```typescript
+await messageService.deleteMessage(conversation, 'message-id-123');
+```
+
+#### Stop Listening to Messages
+
+```typescript
+messageService.detachListener(conversation);
+```
+
+---
+
+### ⚡ Real-time Updates
+
+The library provides built-in real-time synchronization using Firebase's snapshot listeners.
+
+#### Complete Real-time Example
+
+```typescript
+// Start listening to conversations
+await conversationService.listenToConversations((conversations) => {
+  console.log('Conversations updated!');
+});
+
+// Start listening to messages in a specific conversation
+messageService.listen(conversation, (messages) => {
+  console.log('New messages received!');
+
+  if (messages.hasData()) {
+    const messageList = messages.data();
+    // Update UI with new messages
+    updateChatUI(messageList);
+  }
+});
+
+// When done, clean up
+conversationService.detachListener();
+messageService.detachListener(conversation);
+```
+
+---
+
+### 📄 Pagination Support
+
+Efficiently load large datasets with built-in pagination.
+
+```typescript
+// Get first batch of messages (default limit: 25)
+const firstBatch = await messageService.getMessages(conversation);
+
+// Get next batch using the last message ID
+const messages = firstBatch.data();
+const lastMessageId = messages[messages.length - 1].getId();
+
+const nextBatch = await messageService.getMessages(conversation, lastMessageId);
+```
+
+---
+
+## Documentation
+
+### API Reference
+
+For detailed API documentation, see:
+
+- [UserService Methods](#userservice-api)
+- [ConversationService Methods](#conversationservice-api)
+- [MessageService Methods](#messageservice-api)
+- [Data Models](#data-models)
+
+### UserService API
+
+| Method             | Parameters       | Returns                      | Description             |
+| ------------------ | ---------------- | ---------------------------- | ----------------------- |
+| `getUser(userId)`  | `userId: string` | `Promise<User \| undefined>` | Fetch a user by ID      |
+| `newUser(user)`    | `user: NewUser`  | `Promise<User>`              | Create a new user       |
+| `updateUser(user)` | `user: User`     | `Promise<User>`              | Update user information |
+| `deleteUser(user)` | `user: User`     | `Promise<void>`              | Delete a user           |
+
+### ConversationService API
+
+| Method                                  | Parameters                                    | Returns                                 | Description                     |
+| --------------------------------------- | --------------------------------------------- | --------------------------------------- | ------------------------------- |
+| `getConversations()`                    | None                                          | `Promise<Record<string, Conversation>>` | Get all conversations           |
+| `startConversation(user, conversation)` | `user: User`<br/>`conversation: Conversation` | `Promise<Conversation>`                 | Start a new conversation        |
+| `listenToConversations(callback)`       | `callback: Function`                          | `Promise<void>`                         | Listen for conversation updates |
+| `deleteConversation(conversation)`      | `conversation: Conversation`                  | `void`                                  | Delete a conversation           |
+| `detachListener()`                      | None                                          | `void`                                  | Stop listening                  |
+
+### MessageService API
+
+| Method                                   | Parameters                                            | Returns                                 | Description                  |
+| ---------------------------------------- | ----------------------------------------------------- | --------------------------------------- | ---------------------------- |
+| `getMessages(conversation, start?)`      | `conversation: Conversation`<br/>`start?: string`     | `Promise<DatabaseResultSet<Message[]>>` | Get messages with pagination |
+| `sendMessage(conversation, message)`     | `conversation: Conversation`<br/>`message: Message`   | `Promise<void>`                         | Send a message               |
+| `listen(conversation, callback)`         | `conversation: Conversation`<br/>`callback: Function` | `void`                                  | Listen for new messages      |
+| `deleteMessage(conversation, messageId)` | `conversation: Conversation`<br/>`messageId: string`  | `Promise<void>`                         | Delete a message             |
+| `detachListener(conversation)`           | `conversation: Conversation`                          | `void`                                  | Stop listening               |
+
+### Data Models
+
+### Data Models
+
+#### User
+
+Represents a user in the messaging system.
+
+```typescript
+type NewUser = {
+  id: string; // Unique user identifier
+  name: string; // Display name
+  profileImg: string; // Profile image URL
+  lastSeen: string; // Last activity timestamp
+  permissions: string[]; // User permissions/roles
+  conversationsId: string; // Unique conversation collection ID (format: conv_{userId})
+};
+```
+
+**Key Methods:**
+
+- `getId()` - Get user ID
+- `getName()` - Get user name
+- `getIsActive()` - Check if user is online
+- `getConversationsId()` - Get conversation collection ID
+- `setIsActive(status)` - Set online/offline status
+- `toObj()` - Convert to plain object for storage
+
+#### Conversation
+
+Represents a conversation/thread between participants.
+
+```typescript
+interface NewConversation {
+  id: string; // Unique conversation identifier
+  participants: string[]; // Array of participant user IDs
+  startedDate?: string; // When conversation was created
+  lastUpdatedTime?: string; // Last activity timestamp
+  lastMessageId?: string; // ID of most recent message
+  timestamp?: number; // Unix timestamp for sorting
+  messages?: Record<string, Message>; // Cached messages
+}
+```
+
+**Key Methods:**
+
+- `getId()` - Get conversation ID
+- `getParticipants()` - Get participant IDs
+- `getMessages()` - Get cached messages
+- `setMessage(message)` - Add a message
+- `deleteMessage(messageId)` - Remove a message
+- `toObj()` - Convert to plain object for storage
+
+#### Message
+
+Represents a single message in a conversation.
+
+```typescript
+type NewMessage = {
+  id?: string; // Unique message identifier (auto-generated if not provided)
+  senderId: string; // ID of sender
+  content?: string; // Message text
+  time?: string; // Human-readable timestamp
+  timestamp?: number; // Unix timestamp for ordering
+};
+```
+
+**Key Methods:**
+
+- `getId()` - Get message ID
+- `getSenderId()` - Get sender ID
+- `getContent()` - Get message text
+- `getTime()` - Get formatted time
+- `setContent(message)` - Update content
+- `toObj()` - Convert to plain object for storage
+
+---
+
+## Architecture
+
+### Overview
+
+Messenger Core follows a clean, layered architecture with clear separation of concerns:
+
+```
+┌─────────────────────────────────┐
+│      MessengerCore (Facade)     │  ← Entry point
+└────────────┬────────────────────┘
+             │
+    ┌────────┴────────┐
+    │   Services      │  ← Business logic
+    │  (User, Conv,   │
+    │   Message)      │
+    └────────┬────────┘
+             │
+    ┌────────┴────────┐
+    │   Datastore     │  ← Database abstraction
+    │  (Interface)    │
+    └────────┬────────┘
+             │
+    ┌────────┴────────┐
+    │  Firebase Impl  │  ← Firebase repositories
+    └─────────────────┘
+```
+
+### Key Design Patterns
+
+- **Facade Pattern**: `MessengerCore` provides a simplified interface to complex subsystems
+- **Repository Pattern**: Data access abstracted through repository interfaces
+- **Service Layer**: Business logic separated into dedicated service classes
+- **Strategy Pattern**: Database implementations are pluggable via interfaces
+- **Observer Pattern**: Real-time listeners notify subscribers of data changes
+
+### Data Structure in Firebase
+
+```
+Firestore Database
+│
+├── users/                          # User collection
+│   └── {userId}/                   # User document
+│
+├── conv_{userId}/                  # Each user's conversations
+│   └── {conversationId}/           # Conversation document
+│
+└── {conversationId}/               # Messages for each conversation
+    └── {messageId}/                # Message document
+```
+
+**Key Design Decisions:**
+
+- **Conversation Duplication**: Each conversation is stored in all participants' collections for efficient querying
+- **Separate Message Collections**: Messages are stored in collections named by conversationId for scalability
+- **User-specific Collection IDs**: Format `conv_{userId}` ensures data isolation
+
+### For In-Depth Understanding
+
+For a comprehensive architectural overview, see [LIBRARY_ARCHITECTURE.md](./Docs/LIBRARY_ARCHITECTURE.md), which includes:
+
+- Detailed component breakdown
+- Complete execution paths
+- Data flow diagrams
+- Implementation details
+- Future enhancement roadmap
+
+---
+
+## Examples
+
+### Complete Chat Application
+
+```typescript
+import { MessengerCore, User, Conversation, Message } from '@maleeshagimshan98/infinite-messenger-core';
+
+// Initialize
+const messenger = new MessengerCore({
+  dbDriver: 'firebase',
+  dbConfig: './firebase-key.json',
+});
+
+// Initialize user session (REQUIRED - must be called first)
+try {
+  await messenger.initialize('user123');
+} catch (error) {
+  if (error.message.includes('User not found')) {
+    // Create user if doesn't exist
+    await messenger.newUser({
+      id: 'user123',
+      name: 'John Doe',
+      profileImg: '',
+      lastSeen: new Date().toISOString(),
+      permissions: ['read', 'write'],
+      conversationsId: 'conv_user123',
+    });
+    await messenger.initialize('user123');
+  } else {
+    throw error;
+  }
 }
 
+// Get services
+const conversationService = messenger.conversationService();
+const messageService = messenger.messageService();
+
+// Load conversations
+await messenger.initConversations();
+
+// Listen for new conversations
+await conversationService.listenToConversations((conversations) => {
+  console.log('Conversations updated!');
+});
+
+// Start a conversation
+const conversation = new Conversation({
+  id: 'conv_' + Date.now(),
+  participants: ['user123', 'user456'],
+});
+
+await conversationService.startConversation(messenger.getUser(), conversation);
+
+// Listen for messages
+messageService.listen(conversation, (messages) => {
+  if (messages.hasData()) {
+    messages.data().forEach((msg) => {
+      console.log(`${msg.getSenderId()}: ${msg.getContent()}`);
+    });
+  }
+});
+
+// Send a message
+const message = new Message({
+  senderId: 'user123',
+  content: 'Hello!',
+});
+
+await messageService.sendMessage(conversation, message);
+
+// Clean up when done
+messageService.detachListener(conversation);
+conversationService.detachListener();
 ```
 
-### Retrieve conversations
+### Proper Initialization & Error Handling
 
-Once you initialized the `MessengerCore`, get user from database with `initUser(userId)`.
-To get user's conversation once, call `initThreads()`. To get updates continuesly, call `listenToConversations(callback)` instead.
+**Always handle the initialization properly:**
 
-Received conversations (if any) are accessible via `user.conversations()` method.
+```typescript
+const messenger = new MessengerCore({
+  dbDriver: 'firebase',
+  dbConfig: './firebase-key.json',
+});
 
-**example**
+try {
+  // Attempt to initialize with existing user
+  await messenger.initialize('user123');
+  console.log('✅ User session initialized successfully');
 
-```
-let messenger = new MessengerCore({dbDriver : 'firebase',dbConfig : firebaseConfig});
+  // Proceed with your application logic
+  await messenger.initConversations();
+  // ... rest of your code
+} catch (error) {
+  if (error.message.includes('User not found')) {
+    console.log('⚠️ User not found. Creating new user...');
 
-await messenger.initUser(userId);
-await messenger.initThreads();
-
-let conversations = messenger.user.conversations(); //... get received conversations
-
-/**
-    ============= example conversations object ==================
-
-    conversations = [
-        {
-            id : '12345612',
-            participants : ['00001','00002'],
-            started : '',
-            lastUpdated : '',
-            messages : []
-        }
-    ];
-
-*/
-
-```
-
-### Create new conversation
-
-call `newThread()` method as follows. This saves the conversation data for all participants. Pass participant user's data as below object. _(Don't send current user as a participant, current user is automatically set as a participant)_
-
-```
-    messenger.newThread(
-        [
-            //... participant object
-            {
-                id : "00002",
-                name : "test user 2",
-                conversationsId : "conv_00002"
-            }
-        ],
-        {id : '123123'} //... object with conversation id
-    );
-
-```
-
-### Get messages in a conversation
-
-call listen() on **conversation object** to get new messages. Pass a callback function if you need to do something everytime new message arrive. updated messages object (with all messages) is passed to the callback as the first argument.
-
-```
-    let conversations = messenger.user.conversations(); //... get received conversations
-
-    let chatWithFoo = conversations['foo']; //... conversation you want to listen for new messages
-
-    chatWithFoo.listen(messages => {
-        //... do something with messages
+    // Create user if not exists
+    const newUser = await messenger.newUser({
+      id: 'user123',
+      name: 'New User',
+      profileImg: '',
+      lastSeen: new Date().toISOString(),
+      permissions: ['read', 'write'],
+      conversationsId: 'conv_user123',
     });
 
+    console.log('✅ User created:', newUser.getName());
+
+    // Initialize with newly created user
+    await messenger.initialize('user123');
+    console.log('✅ User session initialized successfully');
+  } else {
+    console.error('❌ Initialization failed:', error);
+    throw error;
+  }
+}
 ```
 
-### Send messages
+### Common Initialization Patterns
 
-call `sendMessage()` in **conversation object** to send a message.
+**Pattern 1: Existing User (Most Common)**
 
-**example**
+```typescript
+// For existing users in your system
+const messenger = new MessengerCore({ dbDriver: 'firebase', dbConfig: './key.json' });
+await messenger.initialize('existingUserId123');
+// ✅ Ready to use
+```
+
+**Pattern 2: New User Registration**
+
+```typescript
+// When registering a new user
+const messenger = new MessengerCore({ dbDriver: 'firebase', dbConfig: './key.json' });
+
+// Create user first
+await messenger.newUser({
+  id: 'newUserId456',
+  name: 'Alice Johnson',
+  profileImg: 'https://example.com/alice.jpg',
+  lastSeen: new Date().toISOString(),
+  permissions: ['read', 'write'],
+  conversationsId: 'conv_newUserId456',
+});
+
+// Then initialize
+await messenger.initialize('newUserId456');
+// ✅ Ready to use
+```
+
+**Pattern 3: Safe Initialization (Try existing, create if needed)**
+
+```typescript
+const messenger = new MessengerCore({ dbDriver: 'firebase', dbConfig: './key.json' });
+
+async function safeInitialize(userId: string, userData: NewUser) {
+  try {
+    await messenger.initialize(userId);
+    console.log('✅ Existing user initialized');
+  } catch (error) {
+    if (error.message.includes('User not found')) {
+      console.log('⚠️ Creating new user...');
+      await messenger.newUser(userData);
+      await messenger.initialize(userId);
+      console.log('✅ New user created and initialized');
+    } else {
+      throw error;
+    }
+  }
+}
+
+// Use it
+await safeInitialize('user789', {
+  id: 'user789',
+  name: 'Bob Wilson',
+  profileImg: '',
+  lastSeen: new Date().toISOString(),
+  permissions: ['read', 'write'],
+  conversationsId: 'conv_user789',
+});
+// ✅ Ready to use, whether user existed or not
+```
+
+---
+
+### TypeScript Support
+
+try {
+await messenger.initialize('user123');
+} catch (error) {
+if (error.message.includes('User not found')) {
+// Create user if not exists
+const newUser = await messenger.newUser({
+id: 'user123',
+name: 'New User',
+profileImg: '',
+lastSeen: new Date().toISOString(),
+permissions: ['read', 'write'],
+conversationsId: 'conv_user123',
+});
+
+    await messenger.initialize('user123');
+
+} else {
+console.error('Initialization failed:', error);
+}
+}
+
+````
+
+### TypeScript Support
+
+Full TypeScript support with type definitions:
+
+```typescript
+import type {
+  User,
+  Conversation,
+  Message,
+  NewUser,
+  NewConversation,
+  NewMessage,
+} from '@maleeshagimshan98/infinite-messenger-core';
+
+// Type-safe user creation
+const userdata: NewUser = {
+  id: 'user123',
+  name: 'John Doe',
+  profileImg: 'https://example.com/avatar.jpg',
+  lastSeen: new Date().toISOString(),
+  permissions: ['read', 'write'],
+  conversationsId: 'conv_user123',
+};
+
+const user: User = await messenger.newUser(userData);
+````
+
+---
+
+## Testing
+
+The library includes comprehensive test coverage:
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run specific test file
+npm test -- conversation.service.test.ts
+```
+
+**Test Structure:**
+
+- Unit tests for models (User, Conversation, Message)
+- Integration tests for services
+- Firebase repository tests
+- End-to-end workflow tests
+
+---
+
+## License
+
+This project is licensed under the **MIT License** - see below for details.
 
 ```
-    let conversations = messenger.user.conversations(); //... get received conversations
+MIT License
 
-    let chatWithFoo = conversations['foo']; //... conversation you want to send message
+Copyright (c) 2025 Maleesha Gimshan
 
-    await chatWithFoo.sendMessage(
-        {
-            senderId : messenger.user.getId(),
-            content : "test from ui - for thread 123123"
-        });
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 ```
+
+---
 
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated.
+Contributions are welcome and greatly appreciated! 🎉
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement". Don't forget to give the project a star! Thanks again!
+### How to Contribute
 
-1. Fork the Project
-2. Create your Feature Branch (git checkout -b feature/AmazingFeature)
-3. Commit your Changes (git commit -m 'Add some AmazingFeature')
-4. Push to the Branch (git push origin feature/AmazingFeature)
-5. Open a Pull Request
+1. **Fork the repository**
 
-## Licence
+   ```bash
+   git clone https://github.com/maleeshagimshan98/messenger-core-v2.0.git
+   cd messenger-core-v2.0
+   ```
 
-Distributed under the MIT License
+2. **Create a feature branch**
 
-## Contact
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
 
-- email - (maleeshagimshan74@gmail.com)
+3. **Make your changes**
+
+   - Write clean, documented code
+   - Add tests for new features
+   - Ensure all tests pass: `npm test`
+   - Follow the existing code style: `npm run lint`
+
+4. **Commit your changes**
+
+   ```bash
+   git commit -m 'Add some amazing feature'
+   ```
+
+5. **Push to your branch**
+
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+
+6. **Open a Pull Request**
+   - Provide a clear description of changes
+   - Reference any related issues
+   - Ensure CI checks pass
+
+### Development Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Run linter
+npm run lint
+
+# Fix lint issues
+npm run lint:fix
+
+# Format code
+npm run format
+
+# Build
+npm run build
+```
+
+### Code of Conduct
+
+Please be respectful and constructive in all interactions. We aim to maintain a welcoming and inclusive community.
+
+---
+
+## Bug Reports & Feature Requests
+
+### Reporting Bugs
+
+If you find a bug, please [open an issue](https://github.com/maleeshagimshan98/messenger-core-v2.0/issues) with:
+
+- **Clear title** describing the issue
+- **Detailed description** of the problem
+- **Steps to reproduce** the bug
+- **Expected behavior** vs actual behavior
+- **Environment details**:
+  - Node.js version
+  - Library version
+  - Operating system
+  - Database (Firebase/MongoDB)
+- **Code sample** or minimal reproduction
+- **Error messages** or stack traces
+
+**Example:**
+
+````markdown
+## Bug: Messages not appearing in real-time
+
+**Description**: When using `messageService.listen()`, new messages don't appear until page refresh.
+
+**Steps to Reproduce**:
+
+1. Initialize messenger with user123
+2. Start listening to conversation: `messageService.listen(conv, callback)`
+3. Send message from another client
+4. Callback is not invoked
+
+**Expected**: Callback should be invoked with new messages
+**Actual**: No callback, messages appear only after refresh
+
+**Environment**:
+
+- Node.js: v16.14.0
+- Library: v2.0.0
+- OS: Windows 11
+- Database: Firebase
+
+**Code**:
+\```typescript
+messageService.listen(conversation, (messages) => {
+console.log('New messages:', messages.data());
+});
+\```
+
+**Error**: None in console
+````
+
+### Feature Requests
+
+Have an idea? [Open an issue](https://github.com/maleeshagimshan98/messenger-core-v2.0/issues) with:
+
+- **Feature description** - What should it do?
+- **Use case** - Why is it needed?
+- **Example API** - How would you use it?
+- **Alternatives considered** - Other approaches you've thought about
+
+---
+
+## Support & Community
+
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/maleeshagimshan98/messenger-core-v2.0/discussions)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/maleeshagimshan98/messenger-core-v2.0/issues)
+- 📧 **Email**: [maleeshagimshan74@gmail.com](mailto:maleeshagimshan74@gmail.com)
+- 🔗 **Website**: [maleeshagimshan.com](https://www.maleeshagimshan.com)
+
+---
+
+## Author
+
+**Maleesha Gimshan**
+
+- GitHub: [@maleeshagimshan98](https://github.com/maleeshagimshan98)
+- Email: [maleeshagimshan74@gmail.com](mailto:maleeshagimshan74@gmail.com)
+- LinkedIn: [Maleesha Gimshan](https://www.linkedin.com/in/maleeshagimshan)
+
+---
+
+## Acknowledgments
+
+- Firebase team for the amazing real-time database
+- All contributors who have helped improve this library
+- The Node.js and TypeScript communities
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for a detailed history of changes (coming soon).
+
+---
+
+## Roadmap
+
+### Upcoming Features
+
+- 🔄 **MongoDB Support** - Alternative database implementation
+- 📎 **File Attachments** - Support for media messages
+- ✅ **Message Status** - Delivery and read receipts
+- 🔔 **Push Notifications** - Real-time notification support
+- 👥 **Group Management** - Add/remove participants
+- 🔍 **Message Search** - Full-text search capabilities
+- 🔐 **Enhanced Security** - Encryption and permission systems
+
+See [GitHub Issues](https://github.com/maleeshagimshan98/messenger-core-v2.0/issues) for detailed roadmap and progress.
+
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/maleeshagimshan98">Maleesha Gimshan</a>
+</p>
+
+<p align="center">
+  <sub>If you find this library helpful, please consider giving it a ⭐ on GitHub!</sub>
+</p>
