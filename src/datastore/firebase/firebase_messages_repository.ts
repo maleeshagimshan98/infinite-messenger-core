@@ -8,6 +8,7 @@ import FirebaseRepositoryBase from './firebase_repository_base';
 import type { NewMessage } from '../../Models/message';
 import { Message } from '../../Models/message';
 import DatabaseResultSet from '../utils/DatabaseResultSet';
+import type { TransactionOptions } from './firebase_repository_base';
 
 class FirebaseMessagesRepository extends FirebaseRepositoryBase implements MessagesRepository {
   constructor(db: Firestore) {
@@ -20,11 +21,21 @@ class FirebaseMessagesRepository extends FirebaseRepositoryBase implements Messa
    *
    * @param {string} conversationId - conversation id
    * @param {string | undefined} start - starting point
+   * @param {TransactionOptions} transactionOptions optional transaction object
    * @returns {Promise <DatabaseResultSet<Message[]>>} messages
    */
-  async getMessages(conversationId: string, start?: string): Promise<DatabaseResultSet<Message[]>> {
-    const collectionQuery = this.__buildCollectionQuery(conversationId, 'timestamp', 'desc', start);
-    const conversationsSnapshot = await collectionQuery.get();
+  async getMessages(
+    conversationId: string,
+    start?: string,
+    transactionOptions?: TransactionOptions,
+  ): Promise<DatabaseResultSet<Message[]>> {
+    const collectionQuery = this.__buildCollectionQuery(conversationId, 'timestamp', 'desc', start, transactionOptions);
+    let conversationsSnapshot;
+    if (transactionOptions?.transaction) {
+      conversationsSnapshot = await transactionOptions.transaction.get(collectionQuery);
+    } else {
+      conversationsSnapshot = await collectionQuery.get();
+    }
     if (conversationsSnapshot.empty) {
       return new DatabaseResultSet<Message[]>();
     }
@@ -42,10 +53,16 @@ class FirebaseMessagesRepository extends FirebaseRepositoryBase implements Messa
    *
    * @param {string} conversationId - conversation id
    * @param {Message} message message object
+   * @param {TransactionOptions} transactionOptions optional transaction object
    * @returns {Promise<void>} Promise <void>
    */
-  async setMessage(conversationId: string, message: Message): Promise<void> {
-    await this._db.collection(conversationId).doc(message.getId()).set(message.toObj(), { merge: true });
+  async setMessage(conversationId: string, message: Message, transactionOptions?: TransactionOptions): Promise<void> {
+    const docRef = this._db.collection(conversationId).doc(message.getId());
+    if (transactionOptions?.transaction) {
+      transactionOptions.transaction.set(docRef, message.toObj(), { merge: true });
+    } else {
+      await docRef.set(message.toObj(), { merge: true });
+    }
   }
 
   /**
@@ -78,9 +95,13 @@ class FirebaseMessagesRepository extends FirebaseRepositoryBase implements Messa
     );
   }
 
-  async deleteMessage(conversationId: string, messageId: string): Promise<void> {
+  async deleteMessage(
+    conversationId: string,
+    messageId: string,
+    transactionOptions?: TransactionOptions,
+  ): Promise<void> {
     //... delete messages
-    await this._db.collection(conversationId).doc(messageId).delete();
+    await this.__deleteDoc(conversationId, messageId, transactionOptions);
   }
 }
 

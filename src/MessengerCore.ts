@@ -2,7 +2,7 @@
  * Copyright - 2025 - Maleesha Gimshan (github.com/maleeshagimshan98)
  */
 
-import FirebaseDatastore from './datastore/firebase/firebase_repository';
+import FirebaseDatastore from './datastore/firebase/firebase_datastore';
 //import Mongodb from "./datastore/mongodb/mongodb";
 import type { NewUser } from './Models/user';
 import { User } from './Models/user';

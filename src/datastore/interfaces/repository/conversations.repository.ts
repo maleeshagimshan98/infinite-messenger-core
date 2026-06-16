@@ -6,7 +6,12 @@ import type { Conversation } from '../../../Models/thread';
 import type DatabaseResultSet from '../../utils/DatabaseResultSet';
 
 interface ConversationsRepository {
-  getConversations(conversationsId: string, start?: string): Promise<DatabaseResultSet<Conversation[]>>;
+  getConversations(
+    conversationsId: string,
+    orderBy: string,
+    orderByDirection: 'asc' | 'desc',
+    start?: string,
+  ): Promise<DatabaseResultSet<Conversation[]>>;
   addConversation(conversationsId: string, conversation: Conversation): Promise<void>;
   listenToConversations(
     conversationsId: string,

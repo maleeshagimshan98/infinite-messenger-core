@@ -117,11 +117,16 @@ class ConversationService {
   /**
    * get user's conversations from database
    *
+   * @param {string} orderBy order by field
+   * @param {'asc' | 'desc'} orderByDirection order by direction
    * @returns {Promise<Record<string, Conversation>>} user's conversations
    */
-  async getConversations(): Promise<Record<string, Conversation>> {
+  async getConversations(
+    orderBy: string = 'timestamp',
+    orderByDirection: 'asc' | 'desc' = 'desc',
+  ): Promise<Record<string, Conversation>> {
     const conversations = await this.__datastore.conversations
-      .getConversations(this._conversationsId, this.__lastConversationId)
+      .getConversations(this._conversationsId, orderBy, orderByDirection, this.__lastConversationId)
       .catch((err: Error) => {
         //... handle error
         console.log(err);

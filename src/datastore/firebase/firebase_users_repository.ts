@@ -9,6 +9,7 @@ import FirebaseRepositoryBase from './firebase_repository_base';
 import type { NewUser } from '../../Models/user';
 import { User } from '../../Models/user';
 import DatabaseResult from '../utils/DatabaseResult';
+import type { TransactionOptions } from './firebase_repository_base';
 
 class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRepositroy {
   /**
@@ -28,13 +29,25 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
    * get results from given point if start is provided
    *
    * @param {string | undefined} start starting point
+   * @param {TransactionOptions} transactionOptions optional transaction object
    * @returns {Promise<DatabaseResultSet<User[]>>} users
    */
-  async getUsers(start?: string): Promise<DatabaseResultSet<User[]>> {
-    const collectionQuery = this.__buildCollectionQuery(this.__userCollectionName, 'id', 'asc', start);
-    const usersSnapshot = await collectionQuery.get();
+  async getUsers(start?: string, transactionOptions?: TransactionOptions): Promise<DatabaseResultSet<User[]>> {
+    const collectionQuery = this.__buildCollectionQuery(
+      this.__userCollectionName,
+      'id',
+      'asc',
+      start,
+      transactionOptions,
+    );
+    let usersSnapshot;
+    if (transactionOptions?.transaction) {
+      usersSnapshot = await transactionOptions.transaction.get(collectionQuery);
+    } else {
+      usersSnapshot = await collectionQuery.get();
+    }
     if (usersSnapshot.empty) {
-      return new DatabaseResultSet();
+      return new DatabaseResultSet<User[]>();
     }
     return new DatabaseResultSet<User[]>(
       this.__createModelFromCollection(
@@ -46,28 +59,41 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
 
   /**
    * add multiple users to firebase collection
-   * writes data in a batch
+   * writes data in a batch (if no transaction)
    *
    * @param {User[]} users - array of users
+   * @param {TransactionOptions} transactionOptions optional transaction object
    * @returns {Promise<void>} void
    */
-  async setUsers(users: User[]): Promise<void> {
-    const batch = this.batch();
-    users.forEach((user) => {
-      batch.set(this._db.collection(this.__userCollectionName).doc(user.getId()), user.toObj());
-    });
-    await batch.commit();
+  async setUsers(users: User[], transactionOptions?: TransactionOptions): Promise<void> {
+    if (transactionOptions?.transaction) {
+      // If transaction is active, use transaction writes
+      users.forEach((user) => {
+        transactionOptions.transaction!.set(
+          this._db.collection(this.__userCollectionName).doc(user.getId()),
+          user.toObj(),
+        );
+      });
+    } else {
+      // Otherwise use batch writes
+      const batch = this.batch();
+      users.forEach((user) => {
+        batch.set(this._db.collection(this.__userCollectionName).doc(user.getId()), user.toObj());
+      });
+      await batch.commit();
+    }
   }
 
   /**
    * get a single user, returns false if user not exists
    *
    * @param {string} userId user's id
+   * @param {TransactionOptions} transactionOptions optional transaction object
    * @returns {Promise<User>} user
    * @throws {Error}
    */
-  async getUser(userId: string): Promise<DatabaseResult<User>> {
-    const dbResult = await this.__doc(this.__userCollectionName, userId);
+  async getUser(userId: string, transactionOptions?: TransactionOptions): Promise<DatabaseResult<User>> {
+    const dbResult = await this.__doc(this.__userCollectionName, userId, transactionOptions);
     if (!dbResult.exists) {
       return new DatabaseResult<User>();
     }
@@ -79,30 +105,38 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
    * updates the user if user exists
    *
    * @param {User} user
+   * @param {TransactionOptions} transactionOptions optional transaction object
    * @returns {Promise<void>} void
    */
-  async setUser(user: User): Promise<void> {
-    await this._db.collection(this.__userCollectionName).doc(user.getId()).set(user.toObj(), { merge: true });
+  async setUser(user: User, transactionOptions?: TransactionOptions): Promise<void> {
+    const docRef = this._db.collection(this.__userCollectionName).doc(user.getId());
+    if (transactionOptions?.transaction) {
+      transactionOptions.transaction.set(docRef, user.toObj(), { merge: true });
+    } else {
+      await docRef.set(user.toObj(), { merge: true });
+    }
   }
 
   /**
    * update a user's data
    *
    * @param {User} user
+   * @param {TransactionOptions} transactionOptions optional transaction object
    * @returns {Promise<void>} void
    */
-  async updateUser(user: User): Promise<void> {
-    await this._db.collection(this.__userCollectionName).doc(user.getId()).update(user.toObj());
+  async updateUser(user: User, transactionOptions?: TransactionOptions): Promise<void> {
+    await this.__updateDoc(this.__userCollectionName, user.getId(), user.toObj(), transactionOptions);
   }
 
   /**
    * delete a user
    *
    * @param {User} user
+   * @param {TransactionOptions} transactionOptions optional transaction object
    * @returns {Promise<void>}
    */
-  async deleteUser(user: User): Promise<void> {
-    await this._db.collection(this.__userCollectionName).doc(user.getId()).delete();
+  async deleteUser(user: User, transactionOptions?: TransactionOptions): Promise<void> {
+    await this.__deleteDoc(this.__userCollectionName, user.getId(), transactionOptions);
   }
 }
 

@@ -2,7 +2,7 @@
   "name": "@maleeshagimshan98/infinite-messenger-core",
   "version": "3.0.1",
   "description": "realtime messenging library built with Google Firebase/MongoDB, for Node.js servers",
-  "main": "dist/MessengerCore.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist",

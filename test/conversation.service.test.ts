@@ -1,5 +1,5 @@
 import { ConversationService } from '../src/Service/ConversationService';
-import FirebaseDatastore from '../src/datastore/firebase/firebase_repository';
+import FirebaseDatastore from '../src/datastore/firebase/firebase_datastore';
 import { Conversation, NewConversation } from '../src/Models/thread';
 import { User } from '../src/Models/user';
 import FirebaseConversationsRepository from '../src/datastore/firebase/firebase_conversations_repository';

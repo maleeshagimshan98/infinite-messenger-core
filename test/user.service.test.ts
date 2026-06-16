@@ -1,5 +1,5 @@
 import { UserService } from '../src/Service/UserService';
-import FirebaseDatastore from '../src/datastore/firebase/firebase_repository';
+import FirebaseDatastore from '../src/datastore/firebase/firebase_datastore';
 import { User } from '../src/Models/user';
 
 describe('UserService', () => {
