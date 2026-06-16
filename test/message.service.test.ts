@@ -1,5 +1,5 @@
 import { MessageService } from '../src/Service/MessageService';
-import FirebaseDatastore from '../src/datastore/firebase/firebase_repository';
+import FirebaseDatastore from '../src/datastore/firebase/firebase_datastore';
 import { Conversation } from '../src/Models/thread';
 import { Message } from '../src/Models/message';
 import DatabaseResultSet from '../src/datastore/utils/DatabaseResultSet';

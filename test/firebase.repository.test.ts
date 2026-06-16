@@ -1,6 +1,6 @@
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import FirebaseRepository from '../src/datastore/firebase/firebase_repository';
+import FirebaseRepository from '../src/datastore/firebase/firebase_datastore';
 import FirebaseUsersRepository from '../src/datastore/firebase/firebase_users_repository';
 import FirebaseConversationsRepository from '../src/datastore/firebase/firebase_conversations_repository';
 import FirebaseMessagesRepository from '../src/datastore/firebase/firebase_messages_repository';
