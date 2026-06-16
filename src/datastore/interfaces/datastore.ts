@@ -46,6 +46,14 @@ interface Datastore {
    * @returns {MessagesRepository} Messages repository
    */
   get messages(): MessagesRepository;
+
+  /**
+   * Run a transaction with the provided callback function.
+   *
+   * @param {(transactionOptions: unknown) => Promise<T>} callback The callback function to execute within the transaction.
+   * @returns {Promise<T>} A promise that resolves with the result of the transaction.
+   */
+  transaction<T>(callback: (transactionOptions: unknown) => Promise<T>): Promise<T>;
 }
 
 export { Datastore };

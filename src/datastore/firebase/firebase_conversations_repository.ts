@@ -8,6 +8,7 @@ import FirebaseRepositoryBase from './firebase_repository_base';
 import { Conversation } from '../../Models/thread';
 import type { NewConversation } from '../../Models/thread';
 import DatabaseResultSet from '../utils/DatabaseResultSet';
+import type { TransactionOptions } from './firebase_repository_base';
 
 class FirebaseConversationsRepository extends FirebaseRepositoryBase implements ConversationsRepository {
   /**
@@ -25,11 +26,31 @@ class FirebaseConversationsRepository extends FirebaseRepositoryBase implements 
    *
    * @param {string} conversationsId conversation id
    * @param {string | undefined} start starting document id
+   * @param {string} orderBy field to order by
+   * @param {'asc' | 'desc'} orderByDirection sort direction
+   * @param {TransactionOptions} transactionOptions optional transaction object
    * @returns {Promise <DatabaseResultSet<Conversation[]>>} conversations
    */
-  async getConversations(conversationsId: string, start?: string): Promise<DatabaseResultSet<Conversation[]>> {
-    const collectionQuery = this.__buildCollectionQuery(conversationsId, undefined, undefined, start);
-    const conversationsSnapshot = await collectionQuery.get();
+  async getConversations(
+    conversationsId: string,
+    orderBy: string = 'id',
+    orderByDirection: 'asc' | 'desc' = 'asc',
+    start?: string,
+    transactionOptions?: TransactionOptions,
+  ): Promise<DatabaseResultSet<Conversation[]>> {
+    const collectionQuery = this.__buildCollectionQuery(
+      conversationsId,
+      orderBy,
+      orderByDirection,
+      start,
+      transactionOptions,
+    );
+    let conversationsSnapshot;
+    if (transactionOptions?.transaction) {
+      conversationsSnapshot = await transactionOptions.transaction.get(collectionQuery);
+    } else {
+      conversationsSnapshot = await collectionQuery.get();
+    }
     if (conversationsSnapshot.empty) {
       return new DatabaseResultSet<Conversation[]>();
     }
@@ -47,12 +68,22 @@ class FirebaseConversationsRepository extends FirebaseRepositoryBase implements 
    *
    * @param {string} conversationsId user's conversations id
    * @param {Conversation} conversation conversation object
+   * @param {TransactionOptions} transactionOptions optional transaction object
    * @returns {Promise<void>} void
    */
-  async addConversation(conversationsId: string, conversation: Conversation): Promise<void> {
-    this.batch().set(this._db.collection(conversationsId).doc(conversation.getId()), conversation.toObj(), {
-      merge: true,
-    });
+  async addConversation(
+    conversationsId: string,
+    conversation: Conversation,
+    transactionOptions?: TransactionOptions,
+  ): Promise<void> {
+    const docRef = this._db.collection(conversationsId).doc(conversation.getId());
+    if (transactionOptions?.transaction) {
+      transactionOptions.transaction.set(docRef, conversation.toObj(), { merge: true });
+    } else {
+      const batch = this.batch();
+      batch.set(docRef, conversation.toObj(), { merge: true });
+      await batch.commit();
+    }
   }
 
   /**
@@ -91,10 +122,15 @@ class FirebaseConversationsRepository extends FirebaseRepositoryBase implements 
    *
    * @param {string} userConversationId user's conversations identifier
    * @param {string} conversationId conversation id of the particular conversation
+   * @param {TransactionOptions} transactionOptions optional transaction object
    * @return {Promise<void>}
    */
-  async deleteConversation(userConversationId: string, conversationId: string): Promise<void> {
-    await this._db.collection(userConversationId).doc(conversationId).delete();
+  async deleteConversation(
+    userConversationId: string,
+    conversationId: string,
+    transactionOptions?: TransactionOptions,
+  ): Promise<void> {
+    await this.__deleteDoc(userConversationId, conversationId, transactionOptions);
   }
 }
 
