@@ -7,10 +7,10 @@ import type { Conversation } from './thread';
 type NewUser = {
   id: string;
   name: string;
-  profileImg: string;
-  lastSeen: string;
-  permissions: string[];
-  conversationsId: string;
+  profileImg?: string;
+  lastSeen?: string;
+  permissions?: string[];
+  conversationsId?: string;
 };
 
 /**
