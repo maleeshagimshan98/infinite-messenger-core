@@ -33,8 +33,8 @@ class FirebaseConversationsRepository extends FirebaseRepositoryBase implements 
    */
   async getConversations(
     conversationsId: string,
-    orderBy: string = 'id',
-    orderByDirection: 'asc' | 'desc' = 'asc',
+    orderBy: string = 'timestamp',
+    orderByDirection: 'asc' | 'desc' = 'desc',
     start?: string,
     transactionOptions?: TransactionOptions,
   ): Promise<DatabaseResultSet<Conversation[]>> {
