@@ -38,11 +38,14 @@ class MessageService {
    * get messages from the conversation
    *
    * @param {Conversation} conversation conversation instance
+   * @param {string} [start] pagination cursor - the **timestamp** (Unix milliseconds as a string) of the
+   *   last loaded message.
    * @returns {Promise<DatabaseResultSet<Message[]>>}
    */
-  async getMessages(conversation: Conversation): Promise<DatabaseResultSet<Message[]>> {
+  async getMessages(conversation: Conversation, start?: string): Promise<DatabaseResultSet<Message[]>> {
     const messagesCollection: DatabaseResultSet<Message[]> = await this.__datastore.messages.getMessages(
       conversation.getId(),
+      start,
     );
     const messages = messagesCollection.data();
     if (messagesCollection && messagesCollection.hasData() && messages) {
