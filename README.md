@@ -318,7 +318,15 @@ await messageService.sendMessage(conversation, message);
 
 #### Retrieve Messages
 
+Fetch the first batch of messages for a conversation. Optionally, pass a **start** cursor (the **timestamp** of the last loaded message) to retrieve the next page of older results.
+
+| Parameter      | Type                 | Required | Description                                                    |
+| -------------- | -------------------- | -------- | -------------------------------------------------------------- |
+| `conversation` | `Conversation`       | ✅ Yes   | The conversation to fetch messages from.                       |
+| `start`        | `string`             | ❌ No    | The **timestamp** of the last loaded message. Omit to load from the latest messages. |
+
 ```typescript
+// Fetch the first batch of messages
 const messagesResult = await messageService.getMessages(conversation);
 
 if (messagesResult.hasData()) {
@@ -328,6 +336,11 @@ if (messagesResult.hasData()) {
     console.log(`${msg.getSenderId()}: ${msg.getContent()}`);
     console.log(`Sent at: ${msg.getTime()}`);
   });
+
+  // To load the next (older) page, pass the timestamp of the last message as the start cursor
+  const lastMessage = messages[messages.length - 1];
+  const lastTimestamp = lastMessage.toObj().timestamp.toString();
+  const nextPage = await messageService.getMessages(conversation, lastTimestamp);
 }
 ```
 
@@ -392,18 +405,45 @@ messageService.detachListener(conversation);
 
 ### 📄 Pagination Support
 
-Efficiently load large datasets with built-in pagination.
+Efficiently load large datasets with built-in cursor-based pagination. The `getMessages` method accepts an optional `start` parameter — a **timestamp** value used as a Firestore `.startAfter()` cursor against the `orderBy('timestamp', 'desc')` query.
+
+> ⚠️ **Important**: The `start` parameter must be the **timestamp** (Unix milliseconds as a string) of the last loaded message, **not** the message ID.
+
+#### Parameters
+
+| Parameter | Type     | Required | Description                                                               |
+| --------- | -------- | -------- | ------------------------------------------------------------------------- |
+| `start`   | `string` | ❌ No    | The **timestamp** of the last loaded message (e.g. `lastMessage.toObj().timestamp.toString()`). Pass this to retrieve the next page of older messages. Omit to load from the latest messages. |
+
+#### Example: Loading Messages in Pages
 
 ```typescript
-// Get first batch of messages (default limit: 25)
+// Step 1: Load the first (latest) batch of messages — no cursor needed
 const firstBatch = await messageService.getMessages(conversation);
 
-// Get next batch using the last message ID
-const messages = firstBatch.data();
-const lastMessageId = messages[messages.length - 1].getId();
+if (firstBatch.hasData()) {
+  const messages = firstBatch.data();
 
-const nextBatch = await messageService.getMessages(conversation, lastMessageId);
+  messages.forEach((msg) => {
+    console.log(`${msg.getSenderId()}: ${msg.getContent()}`);
+  });
+
+  // Step 2: Get the timestamp of the oldest message in this batch
+  const lastMessage = messages[messages.length - 1];
+  const lastTimestamp = lastMessage.toObj().timestamp.toString();
+
+  // Step 3: Load the next (older) batch using the timestamp as cursor
+  const nextBatch = await messageService.getMessages(conversation, lastTimestamp);
+
+  if (nextBatch.hasData()) {
+    nextBatch.data().forEach((msg) => {
+      console.log(`${msg.getSenderId()}: ${msg.getContent()}`);
+    });
+  }
+}
 ```
+
+> 💡 **Tip**: Repeat step 2–3 with the timestamp from the last message of each batch to implement infinite scroll / load-more functionality.
 
 ---
 
@@ -439,13 +479,13 @@ For detailed API documentation, see:
 
 ### MessageService API
 
-| Method                                   | Parameters                                            | Returns                                 | Description                  |
-| ---------------------------------------- | ----------------------------------------------------- | --------------------------------------- | ---------------------------- |
-| `getMessages(conversation, start?)`      | `conversation: Conversation`<br/>`start?: string`     | `Promise<DatabaseResultSet<Message[]>>` | Get messages with pagination |
-| `sendMessage(conversation, message)`     | `conversation: Conversation`<br/>`message: Message`   | `Promise<void>`                         | Send a message               |
-| `listen(conversation, callback)`         | `conversation: Conversation`<br/>`callback: Function` | `void`                                  | Listen for new messages      |
-| `deleteMessage(conversation, messageId)` | `conversation: Conversation`<br/>`messageId: string`  | `Promise<void>`                         | Delete a message             |
-| `detachListener(conversation)`           | `conversation: Conversation`                          | `void`                                  | Stop listening               |
+| Method                                   | Parameters                                                                                                                                                                           | Returns                                 | Description                                     |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- | ----------------------------------------------- |
+| `getMessages(conversation, start?)`      | `conversation: Conversation` — the target conversation<br/>`start?: string` — **optional** pagination cursor: the **timestamp** (Unix ms, as a string) of the last loaded message. Fetches messages older than this value. Omit to start from the latest. | `Promise<DatabaseResultSet<Message[]>>` | Fetch messages with cursor-based pagination using the `timestamp` field. |
+| `sendMessage(conversation, message)`     | `conversation: Conversation`<br/>`message: Message`                                                                                                                                  | `Promise<void>`                         | Send a message to a conversation                |
+| `listen(conversation, callback)`         | `conversation: Conversation`<br/>`callback: Function` — invoked with `DatabaseResultSet<Message[]>` on each update                                                                   | `void`                                  | Listen for new messages in real-time            |
+| `deleteMessage(conversation, messageId)` | `conversation: Conversation`<br/>`messageId: string` — ID of the message to delete                                                                                                   | `Promise<void>`                         | Delete a message from a conversation            |
+| `detachListener(conversation)`           | `conversation: Conversation`                                                                                                                                                         | `void`                                  | Stop listening for messages                     |
 
 ### Data Models
 
@@ -560,7 +600,7 @@ Messenger Core follows a clean, layered architecture with clear separation of co
 - **Strategy Pattern**: Database implementations are pluggable via interfaces
 - **Observer Pattern**: Real-time listeners notify subscribers of data changes
 
-### Data Structure in Firebase
+### Data Structure in Database
 
 ```
 Firestore Database
@@ -896,8 +936,8 @@ Contributions are welcome and greatly appreciated! 🎉
 1. **Fork the repository**
 
    ```bash
-   git clone https://github.com/maleeshagimshan98/messenger-core-v2.0.git
-   cd messenger-core-v2.0
+   git clone https://github.com/maleeshagimshan98/infinite-messenger-core.git
+   cd infinite-messenger-core
    ```
 
 2. **Create a feature branch**
@@ -962,7 +1002,7 @@ Please be respectful and constructive in all interactions. We aim to maintain a 
 
 ### Reporting Bugs
 
-If you find a bug, please [open an issue](https://github.com/maleeshagimshan98/messenger-core-v2.0/issues) with:
+If you find a bug, please [open an issue](https://github.com/maleeshagimshan98/infinite-messenger-core/issues) with:
 
 - **Clear title** describing the issue
 - **Detailed description** of the problem
@@ -1012,7 +1052,7 @@ console.log('New messages:', messages.data());
 
 ### Feature Requests
 
-Have an idea? [Open an issue](https://github.com/maleeshagimshan98/messenger-core-v2.0/issues) with:
+Have an idea? [Open an issue](https://github.com/maleeshagimshan98/infinite-messenger-core/issues) with:
 
 - **Feature description** - What should it do?
 - **Use case** - Why is it needed?
@@ -1023,8 +1063,8 @@ Have an idea? [Open an issue](https://github.com/maleeshagimshan98/messenger-cor
 
 ## Support & Community
 
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/maleeshagimshan98/messenger-core-v2.0/discussions)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/maleeshagimshan98/messenger-core-v2.0/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/maleeshagimshan98/infinite-messenger-core/discussions)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/maleeshagimshan98/infinite-messenger-core/issues)
 - 📧 **Email**: [maleeshagimshan74@gmail.com](mailto:maleeshagimshan74@gmail.com)
 - 🔗 **Website**: [maleeshagimshan.com](https://www.maleeshagimshan.com)
 
@@ -1066,7 +1106,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for a detailed history of changes (coming soo
 - 🔍 **Message Search** - Full-text search capabilities
 - 🔐 **Enhanced Security** - Encryption and permission systems
 
-See [GitHub Issues](https://github.com/maleeshagimshan98/messenger-core-v2.0/issues) for detailed roadmap and progress.
+See [GitHub Issues](https://github.com/maleeshagimshan98/infinite-messenger-core/issues) for detailed roadmap and progress.
 
 ---
 
