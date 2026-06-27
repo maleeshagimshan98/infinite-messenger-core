@@ -10,6 +10,8 @@ import FirebaseUsersRepository from './firebase_users_repository';
 import FirebaseConversationsRepository from './firebase_conversations_repository';
 import FirebaseMessagesRepository from './firebase_messages_repository';
 
+export type FirebaseTransactionOptions = { transaction: FirebaseFirestore.Transaction };
+
 class FirebaseDatastore implements Datastore {
   /**
    * Firestore database instance.
@@ -65,11 +67,11 @@ class FirebaseDatastore implements Datastore {
    * Run a transaction with the provided callback function.
    * Validates that no batch writes are active before starting the transaction.
    *
-   * @param {(transactionOptions: unknown) => Promise<T>} callback The callback function to execute within the transaction.
+   * @param {(transactionOptions: FirebaseTransactionOptions) => Promise<T>} callback The callback function to execute within the transaction.
    * @returns {Promise<T>} A promise that resolves with the result of the transaction.
    * @throws {Error} if any repository has an active batch write
    */
-  async transaction<T>(callback: (transactionOptions: unknown) => Promise<T>): Promise<T> {
+  async transaction<T>(callback: (transactionOptions: FirebaseTransactionOptions) => Promise<T>): Promise<T> {
     // Check if any batch writes are active in any repository
     if (this.__user.isBatchWriteActive()) {
       throw new Error(

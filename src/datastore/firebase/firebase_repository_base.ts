@@ -205,7 +205,6 @@ class FirebaseRepositoryBase {
     orderBy = 'timestamp',
     orderByDirection: OrderByDirection = 'desc',
     start?: string,
-    _transactionOptions?: TransactionOptions,
   ): Query {
     if (!collectionName) {
       throw new Error(`Error:firebaseRepositoryBase - collection name is required.`);

@@ -38,13 +38,7 @@ class FirebaseConversationsRepository extends FirebaseRepositoryBase implements 
     start?: string,
     transactionOptions?: TransactionOptions,
   ): Promise<DatabaseResultSet<Conversation[]>> {
-    const collectionQuery = this.__buildCollectionQuery(
-      conversationsId,
-      orderBy,
-      orderByDirection,
-      start,
-      transactionOptions,
-    );
+    const collectionQuery = this.__buildCollectionQuery(conversationsId, orderBy, orderByDirection, start);
     let conversationsSnapshot;
     if (transactionOptions?.transaction) {
       conversationsSnapshot = await transactionOptions.transaction.get(collectionQuery);

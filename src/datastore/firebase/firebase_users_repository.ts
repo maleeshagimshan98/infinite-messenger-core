@@ -33,13 +33,7 @@ class FirebaseUsersRepository extends FirebaseRepositoryBase implements UsersRep
    * @returns {Promise<DatabaseResultSet<User[]>>} users
    */
   async getUsers(start?: string, transactionOptions?: TransactionOptions): Promise<DatabaseResultSet<User[]>> {
-    const collectionQuery = this.__buildCollectionQuery(
-      this.__userCollectionName,
-      'id',
-      'asc',
-      start,
-      transactionOptions,
-    );
+    const collectionQuery = this.__buildCollectionQuery(this.__userCollectionName, 'id', 'asc', start);
     let usersSnapshot;
     if (transactionOptions?.transaction) {
       usersSnapshot = await transactionOptions.transaction.get(collectionQuery);

@@ -21,7 +21,6 @@ class FirebaseMessagesRepository extends FirebaseRepositoryBase implements Messa
    *
    * @param {string} conversationId - conversation id
    * @param {string | undefined} start - starting point
-   * @param {TransactionOptions} transactionOptions optional transaction object
    * @returns {Promise <DatabaseResultSet<Message[]>>} messages
    */
   async getMessages(
@@ -29,7 +28,7 @@ class FirebaseMessagesRepository extends FirebaseRepositoryBase implements Messa
     start?: string,
     transactionOptions?: TransactionOptions,
   ): Promise<DatabaseResultSet<Message[]>> {
-    const collectionQuery = this.__buildCollectionQuery(conversationId, 'timestamp', 'desc', start, transactionOptions);
+    const collectionQuery = this.__buildCollectionQuery(conversationId, 'timestamp', 'desc', start);
     let conversationsSnapshot;
     if (transactionOptions?.transaction) {
       conversationsSnapshot = await transactionOptions.transaction.get(collectionQuery);
