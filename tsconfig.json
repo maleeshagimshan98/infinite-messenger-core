@@ -2,8 +2,8 @@
   "compilerOptions": {
     /* 💡 Output & Language Features */
     "target": "ESNext" /* Use the latest ECMAScript features */,
-    "module": "CommonJS" /* Use CommonJS modules (for Node.js) */,
-    "moduleResolution": "node" /* Use Node.js module resolution */,
+    "module": "NodeNext" /* Use CommonJS modules (for Node.js) */,
+    "moduleResolution": "nodenext" /* Use Node.js module resolution */,
 
     "outDir": "dist" /* Output compiled files to 'dist' */,
     "allowJs": false /* Don't allow JavaScript files in the project */,
