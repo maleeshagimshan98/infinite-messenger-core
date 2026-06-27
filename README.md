@@ -320,10 +320,10 @@ await messageService.sendMessage(conversation, message);
 
 Fetch the first batch of messages for a conversation. Optionally, pass a **start** cursor (the **timestamp** of the last loaded message) to retrieve the next page of older results.
 
-| Parameter      | Type                 | Required | Description                                                    |
-| -------------- | -------------------- | -------- | -------------------------------------------------------------- |
-| `conversation` | `Conversation`       | ✅ Yes   | The conversation to fetch messages from.                       |
-| `start`        | `string`             | ❌ No    | The **timestamp** of the last loaded message. Omit to load from the latest messages. |
+| Parameter      | Type           | Required | Description                                                                          |
+| -------------- | -------------- | -------- | ------------------------------------------------------------------------------------ |
+| `conversation` | `Conversation` | ✅ Yes   | The conversation to fetch messages from.                                             |
+| `start`        | `string`       | ❌ No    | The **timestamp** of the last loaded message. Omit to load from the latest messages. |
 
 ```typescript
 // Fetch the first batch of messages
@@ -411,8 +411,8 @@ Efficiently load large datasets with built-in cursor-based pagination. The `getM
 
 #### Parameters
 
-| Parameter | Type     | Required | Description                                                               |
-| --------- | -------- | -------- | ------------------------------------------------------------------------- |
+| Parameter | Type     | Required | Description                                                                                                                                                                                   |
+| --------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `start`   | `string` | ❌ No    | The **timestamp** of the last loaded message (e.g. `lastMessage.toObj().timestamp.toString()`). Pass this to retrieve the next page of older messages. Omit to load from the latest messages. |
 
 #### Example: Loading Messages in Pages
@@ -479,13 +479,13 @@ For detailed API documentation, see:
 
 ### MessageService API
 
-| Method                                   | Parameters                                                                                                                                                                           | Returns                                 | Description                                     |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- | ----------------------------------------------- |
+| Method                                   | Parameters                                                                                                                                                                                                                                                | Returns                                 | Description                                                              |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
 | `getMessages(conversation, start?)`      | `conversation: Conversation` — the target conversation<br/>`start?: string` — **optional** pagination cursor: the **timestamp** (Unix ms, as a string) of the last loaded message. Fetches messages older than this value. Omit to start from the latest. | `Promise<DatabaseResultSet<Message[]>>` | Fetch messages with cursor-based pagination using the `timestamp` field. |
-| `sendMessage(conversation, message)`     | `conversation: Conversation`<br/>`message: Message`                                                                                                                                  | `Promise<void>`                         | Send a message to a conversation                |
-| `listen(conversation, callback)`         | `conversation: Conversation`<br/>`callback: Function` — invoked with `DatabaseResultSet<Message[]>` on each update                                                                   | `void`                                  | Listen for new messages in real-time            |
-| `deleteMessage(conversation, messageId)` | `conversation: Conversation`<br/>`messageId: string` — ID of the message to delete                                                                                                   | `Promise<void>`                         | Delete a message from a conversation            |
-| `detachListener(conversation)`           | `conversation: Conversation`                                                                                                                                                         | `void`                                  | Stop listening for messages                     |
+| `sendMessage(conversation, message)`     | `conversation: Conversation`<br/>`message: Message`                                                                                                                                                                                                       | `Promise<void>`                         | Send a message to a conversation                                         |
+| `listen(conversation, callback)`         | `conversation: Conversation`<br/>`callback: Function` — invoked with `DatabaseResultSet<Message[]>` on each update                                                                                                                                        | `void`                                  | Listen for new messages in real-time                                     |
+| `deleteMessage(conversation, messageId)` | `conversation: Conversation`<br/>`messageId: string` — ID of the message to delete                                                                                                                                                                        | `Promise<void>`                         | Delete a message from a conversation                                     |
+| `detachListener(conversation)`           | `conversation: Conversation`                                                                                                                                                                                                                              | `void`                                  | Stop listening for messages                                              |
 
 ### Data Models
 

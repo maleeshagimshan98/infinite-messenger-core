@@ -34,6 +34,7 @@ src/datastore/utils/            ← DatabaseResult / DatabaseResultSet wrappers
 ```
 
 **Layer rules:**
+
 - Services call repository interfaces — never call Firestore/MongoDB APIs directly from a service.
 - Domain models own state, validation, and serialization (`toObj()` for persistence).
 - New backends implement the interfaces in `src/datastore/interfaces/`.
@@ -42,29 +43,33 @@ src/datastore/utils/            ← DatabaseResult / DatabaseResultSet wrappers
 
 ```ts
 const core = new MessengerCore({ dbDriver: 'firebase', dbConfig: './serviceAccount.json' });
-await core.initialize(userId);   // throws 'MessengerCore:Error: User not found' if absent
+await core.initialize(userId); // throws 'MessengerCore:Error: User not found' if absent
 // only now are conversation/message services usable
 ```
 
 ## Key Conventions
 
 ### TypeScript
+
 - Strict mode: `noImplicitAny`, `strictNullChecks`, `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`.
 - Target ESNext, output CommonJS.
 - `tsconfig.build.json` excludes tests during `compile`.
 
 ### Style
+
 - Prettier: 120-char print width, single quotes, trailing commas, LF line endings.
 - ESLint enforces `@typescript-eslint/explicit-function-return-type: error` — every function needs a return type.
 - `@typescript-eslint/no-explicit-any: warn` — avoid `any`; use `unknown` or proper types.
 
 ### Testing
+
 - Tests live in `test/`, named `*.test.ts` (or `*.test.js` for setup helpers).
 - Jest is configured with `maxWorkers: 1` — tests run serially.
 - Firebase tests mock the Admin SDK; no live Firebase project required.
 - [test/firebase.transaction.test.ts](test/firebase.transaction.test.ts) covers batch/transaction mutual-exclusion guards — update it when touching transaction logic.
 
 ### Repository Pattern
+
 - All repository return values use `DatabaseResult<T>` (single) or `DatabaseResultSet<T>` (collection).
 - Batch writes and Firestore transactions are mutually exclusive; the guard lives in [src/datastore/firebase/firebase_repository_base.ts](src/datastore/firebase/firebase_repository_base.ts).
 
