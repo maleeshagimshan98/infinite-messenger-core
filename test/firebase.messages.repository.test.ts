@@ -77,4 +77,67 @@ describe('FirebaseMessagesRepository Integration Tests', () => {
     const doc = await db.collection(testConversationId).doc(testMessageId).get();
     expect(doc.exists).toBe(false);
   });
+
+  describe('Transaction Support - Messages', () => {
+    const transactionTestConvId = `txn_msg_conv_${Date.now()}`;
+    const transactionTestMessageId = `txn_msg_${Date.now()}`;
+    const transactionTestMessageData: NewMessage = {
+      id: transactionTestMessageId,
+      senderId: 'txn_msg_user_1',
+      content: 'Transaction test message',
+      timestamp: Date.now(),
+    };
+
+    test('should support transaction parameter in setMessage', async () => {
+      const db = getFirestore();
+      const message = new Message(transactionTestMessageData);
+
+      const result = await db.runTransaction(async (transaction) => {
+        await firebaseMessagesRepository.setMessage(transactionTestConvId, message, { transaction });
+        return message.getId();
+      });
+
+      expect(result).toBe(transactionTestMessageId);
+
+      const retrieved = await firebaseMessagesRepository.getMessages(transactionTestConvId);
+      expect(retrieved.hasData()).toBe(true);
+    });
+
+    test('should support transaction parameter in getMessages', async () => {
+      const db = getFirestore();
+      const message = new Message(transactionTestMessageData);
+      await firebaseMessagesRepository.setMessage(transactionTestConvId, message);
+      await firebaseMessagesRepository.commit();
+
+      const result = await db.runTransaction(async (transaction) => {
+        const result = await firebaseMessagesRepository.getMessages(
+          transactionTestConvId,
+          undefined,
+          {
+            transaction,
+          },
+        );
+        return result.data()?.length;
+      });
+
+      expect(result).toBeGreaterThan(0);
+    });
+
+    test('should support transaction parameter in deleteMessage', async () => {
+      const db = getFirestore();
+      const testMsgId = `txn_delete_msg_${Date.now()}`;
+      const message = new Message({ ...transactionTestMessageData, id: testMsgId });
+      await firebaseMessagesRepository.setMessage(transactionTestConvId, message);
+      await firebaseMessagesRepository.commit();
+
+      await db.runTransaction(async (transaction) => {
+        await firebaseMessagesRepository.deleteMessage(transactionTestConvId, testMsgId, {
+          transaction,
+        });
+      });
+
+      const retrieved = await firebaseMessagesRepository.getMessages(transactionTestConvId);
+      expect(retrieved.data()?.some((msg) => msg.getId() === testMsgId)).toBe(false);
+    });
+  });
 });

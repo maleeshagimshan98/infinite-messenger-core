@@ -13,12 +13,13 @@ describe('FirebaseConversationsRepository Integration Tests', () => {
     timestamp: Date.now(),
   };
 
-  beforeAll(() => {
+  beforeAll(async () => {
     const app = initializeApp({
       credential: cert('./key/key.json'),
     });
     const db = getFirestore(app);
     firebaseConversationsRepository = new FirebaseConversationsRepository(db);
+    await firebaseConversationsRepository.addConversation(testConversationsId, new Conversation(testConversationData));
   });
 
   afterAll(async () => {
@@ -67,5 +68,70 @@ describe('FirebaseConversationsRepository Integration Tests', () => {
     const db = getFirestore();
     const doc = await db.collection(testConversationsId).doc(testConversationId).get();
     expect(doc.exists).toBe(false);
+  });
+
+  describe('Transaction Support - Conversations', () => {
+    const transactionTestConvId = `txn_conv_${Date.now()}`;
+    const transactionTestConversationData: NewConversation = {
+      id: transactionTestConvId,
+      participants: ['txn_user_1', 'txn_user_2'],
+      timestamp: Date.now(),
+    };
+
+    test('should support transaction parameter in addConversation', async () => {
+      const db = getFirestore();
+      const conversation = new Conversation(transactionTestConversationData);
+
+      const result = await db.runTransaction(async (transaction) => {
+        await firebaseConversationsRepository.addConversation(transactionTestConvId, conversation, {
+          transaction,
+        });
+        return conversation.getId();
+      });
+
+      expect(result).toBe(transactionTestConvId);
+
+      const retrieved = await firebaseConversationsRepository.getConversations(transactionTestConvId);
+      expect(retrieved.hasData()).toBe(true);
+    });
+
+    test('should support transaction parameter in getConversations', async () => {
+      const db = getFirestore();
+      const conversation = new Conversation(transactionTestConversationData);
+      await firebaseConversationsRepository.addConversation(transactionTestConvId, conversation);
+      await firebaseConversationsRepository.commit();
+
+      const result = await db.runTransaction(async (transaction) => {
+        const result = await firebaseConversationsRepository.getConversations(
+          transactionTestConvId,
+          undefined,
+          undefined,
+          undefined,
+          {
+            transaction,
+          },
+        );
+        return result.data()?.length;
+      });
+
+      expect(result).toBeGreaterThan(0);
+    });
+
+    test('should support transaction parameter in deleteConversation', async () => {
+      const db = getFirestore();
+      const testId = `txn_delete_conv_${Date.now()}`;
+      const conversation = new Conversation({ ...transactionTestConversationData, id: testId });
+      await firebaseConversationsRepository.addConversation(testId, conversation);
+      await firebaseConversationsRepository.commit();
+
+      await db.runTransaction(async (transaction) => {
+        await firebaseConversationsRepository.deleteConversation(testId, conversation.getId(), {
+          transaction,
+        });
+      });
+
+      const retrieved = await firebaseConversationsRepository.getConversations(testId);
+      expect(retrieved.data()).toBe(undefined);
+    });
   });
 });

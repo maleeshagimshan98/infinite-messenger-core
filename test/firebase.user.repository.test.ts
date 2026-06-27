@@ -73,4 +73,74 @@ describe('FirebaseUsersRepository Integration Tests', () => {
     const result = await firebaseUsersRepository.getUser(testUserId);
     expect(result.hasData()).toBe(false);
   });
+
+  describe('Transaction Support - Users', () => {
+    const transactionTestUserId = `txn_user_${Date.now()}`;
+    const transactionTestUserData: NewUser = {
+      id: transactionTestUserId,
+      name: 'Transaction Test User',
+      profileImg: 'https://example.com/txn-profile.jpg',
+      lastSeen: new Date().toISOString(),
+      permissions: ['read', 'write'],
+      conversationsId: `txn_conv_${Date.now()}`,
+    };
+
+    test('should support transaction parameter in setUser', async () => {
+      const db = getFirestore();
+      const user = new User(transactionTestUserData);
+
+      const result = await db.runTransaction(async (transaction) => {
+        await firebaseUsersRepository.setUser(user, { transaction });
+        return user.getId();
+      });
+
+      expect(result).toBe(transactionTestUserId);
+
+      const retrieved = await firebaseUsersRepository.getUser(transactionTestUserId);
+      expect(retrieved.hasData()).toBe(true);
+    });
+
+    test('should support transaction parameter in getUser', async () => {
+      const db = getFirestore();
+      const user = new User(transactionTestUserData);
+      await firebaseUsersRepository.setUser(user);
+
+      const result = await db.runTransaction(async (transaction) => {
+        const result = await firebaseUsersRepository.getUser(transactionTestUserId, { transaction });
+        return result.data()?.getName();
+      });
+
+      expect(result).toBe(transactionTestUserData.name);
+    });
+
+    test('should support transaction parameter in updateUser', async () => {
+      const db = getFirestore();
+      const user = new User(transactionTestUserData);
+      await firebaseUsersRepository.setUser(user);
+
+      const updatedName = `Updated ${Date.now()}`;
+      const result = await db.runTransaction(async (transaction) => {
+        const updatedUser = new User({ ...transactionTestUserData, name: updatedName });
+        await firebaseUsersRepository.updateUser(updatedUser, { transaction });
+        return updatedName;
+      });
+
+      const retrieved = await firebaseUsersRepository.getUser(transactionTestUserId);
+      expect(retrieved.data()?.getName()).toBe(updatedName);
+    });
+
+    test('should support transaction parameter in deleteUser', async () => {
+      const db = getFirestore();
+      const testId = `txn_delete_${Date.now()}`;
+      const user = new User({ ...transactionTestUserData, id: testId });
+      await firebaseUsersRepository.setUser(user);
+
+      await db.runTransaction(async (transaction) => {
+        await firebaseUsersRepository.deleteUser(user, { transaction });
+      });
+
+      const retrieved = await firebaseUsersRepository.getUser(testId);
+      expect(retrieved.hasData()).toBe(false);
+    });
+  });
 });
